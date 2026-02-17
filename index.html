@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SouGPT</title>
+    <title>SouGPT · Streaming</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         * {
@@ -261,6 +261,7 @@
 
         .reasoning-toggle {
             margin-bottom: 12px;
+            display: none;
         }
 
         .btn-reasoning {
@@ -309,6 +310,7 @@
             line-height: 1.6;
             color: var(--text-secondary);
             white-space: pre-wrap;
+            font-family: 'SF Mono', 'Menlo', monospace;
         }
 
         .typing-indicator {
@@ -575,7 +577,7 @@
 <body>
     <div class="app">
         <header class="header">
-            <div class="logo">SouGPT</div>
+            <div class="logo">SouGPT · streaming</div>
             <div class="header-actions">
                 <button class="btn-text" onclick="newChat()">Baru</button>
                 <button class="btn-icon" onclick="toggleHistory()" aria-label="History">
@@ -640,12 +642,12 @@
     </div>
 
     <script>
-        const API_URL = 'https://sougpt.api.wanzzstoree.my.id/chat/fast';
-        const STORAGE_KEY = 'sougpt_chats_v2';
+        // Konfigurasi
+        const API_URL = 'http://localhost:8000/chat/stream'; // Gunakan endpoint streaming
+        const STORAGE_KEY = 'sougpt_chats_v3';
 
         let currentChatId = null;
         let isProcessing = false;
-        let abortController = null;
 
         const elements = {
             chatInput: document.getElementById('chatInput'),
@@ -675,67 +677,6 @@
             localStorage.setItem(STORAGE_KEY, JSON.stringify(chats.slice(0, 20)));
         }
 
-        function parseResponse(text) {
-            const thinkMatch = text.match(/<think>([\s\S]*?)<\/think>/);
-            
-            if (thinkMatch) {
-                const reasoning = thinkMatch[1].trim();
-                const output = text.replace(/<think>[\s\S]*?<\/think>/, '').trim();
-                return { hasReasoning: true, reasoning, output };
-            }
-            
-            return { hasReasoning: false, reasoning: null, output: text };
-        }
-
-        function createMessageGroup(userText, aiResponse, isTyping = false) {
-            const group = document.createElement('div');
-            group.className = 'message-group';
-            group.dataset.id = generateId();
-
-            const parsed = parseResponse(aiResponse || '');
-
-            const userDiv = document.createElement('div');
-            userDiv.className = 'message message-user';
-            userDiv.innerHTML = `<div class="message-content">${escapeHtml(userText)}</div>`;
-            group.appendChild(userDiv);
-
-            const aiDiv = document.createElement('div');
-            aiDiv.className = 'message message-ai';
-            
-            let aiHtml = '';
-            
-            if (parsed.hasReasoning) {
-                aiHtml += `
-                    <div class="reasoning-toggle">
-                        <button class="btn-reasoning" onclick="toggleReasoning(this)">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M9 18l6-6-6-6"/>
-                            </svg>
-                            Alur Berpikir
-                        </button>
-                        <div class="reasoning-box">
-                            <div class="reasoning-content">${escapeHtml(parsed.reasoning)}</div>
-                        </div>
-                    </div>
-                `;
-            }
-            
-            aiHtml += `<div class="message-content" id="content-${group.dataset.id}">`;
-            
-            if (isTyping) {
-                aiHtml += '<span class="typing-indicator"><span class="typing-dot"></span></span>';
-            } else {
-                aiHtml += marked.parse(parsed.output, { breaks: true });
-            }
-            
-            aiHtml += '</div>';
-            
-            aiDiv.innerHTML = aiHtml;
-            group.appendChild(aiDiv);
-
-            return { group, contentId: `content-${group.dataset.id}`, parsed };
-        }
-
         function toggleReasoning(btn) {
             const box = btn.nextElementSibling;
             const isOpen = box.classList.contains('open');
@@ -745,29 +686,6 @@
             
             const svg = btn.querySelector('svg');
             svg.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(90deg)';
-        }
-
-        async function typeText(elementId, text, speed = 12) {
-            const element = document.getElementById(elementId);
-            if (!element) return;
-
-            let currentText = '';
-            const chars = text.split('');
-            
-            for (let i = 0; i < chars.length; i++) {
-                currentText += chars[i];
-                
-                if (i % 3 === 0 || i === chars.length - 1) {
-                    element.innerHTML = marked.parse(currentText, { breaks: true }) + 
-                        '<span class="typing-indicator"><span class="typing-dot"></span></span>';
-                    scrollToBottom();
-                }
-                
-                await new Promise(r => setTimeout(r, speed));
-            }
-
-            element.innerHTML = marked.parse(text, { breaks: true });
-            scrollToBottom();
         }
 
         function setInput(text) {
@@ -810,6 +728,7 @@
             elements.chatInput.focus();
         }
 
+        // Fungsi utama untuk streaming
         async function sendMessage() {
             const text = elements.chatInput.value.trim();
             if (!text || isProcessing) return;
@@ -823,7 +742,42 @@
             elements.chatInput.value = '';
             autoResize(elements.chatInput);
 
-            const { group, contentId } = createMessageGroup(text, '', true);
+            // Buat group pesan baru
+            const group = document.createElement('div');
+            group.className = 'message-group';
+            group.dataset.id = generateId();
+
+            // User message
+            const userDiv = document.createElement('div');
+            userDiv.className = 'message message-user';
+            userDiv.innerHTML = `<div class="message-content">${escapeHtml(text)}</div>`;
+            group.appendChild(userDiv);
+
+            // AI message container
+            const aiDiv = document.createElement('div');
+            aiDiv.className = 'message message-ai';
+            aiDiv.innerHTML = `
+                <div class="reasoning-toggle">
+                    <button class="btn-reasoning" onclick="toggleReasoning(this)">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 18l6-6-6-6"/>
+                        </svg>
+                        Alur Berpikir
+                    </button>
+                    <div class="reasoning-box">
+                        <div class="reasoning-content"></div>
+                    </div>
+                </div>
+                <div class="message-content" id="content-${group.dataset.id}">
+                    <span class="typing-indicator"><span class="typing-dot"></span></span>
+                </div>
+            `;
+            
+            // Sembunyikan reasoning toggle dulu
+            const reasoningToggle = aiDiv.querySelector('.reasoning-toggle');
+            reasoningToggle.style.display = 'none';
+            
+            group.appendChild(aiDiv);
             elements.messages.appendChild(group);
             scrollToBottom();
 
@@ -831,62 +785,124 @@
             elements.btnSend.disabled = true;
             elements.loading.classList.add('active');
 
-            abortController = new AbortController();
-            const timeoutId = setTimeout(() => abortController.abort(), 60000);
-
+            let accumulatedOutput = '';
+            let finalReasoning = '';
+            const contentElement = document.getElementById(`content-${group.dataset.id}`);
+            
             try {
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        message: text,
-                        model: 'jaahas/qwen3-abliterated:8b',
-                        temperature: 0.7,
-                        max_tokens: 2048,
-                        context_size: 4096
-                    }),
-                    signal: abortController.signal
+                    body: JSON.stringify({ message: text })
                 });
 
-                clearTimeout(timeoutId);
-                elements.loading.classList.remove('active');
-
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-                const data = await response.json();
-                const fullResponse = data.response || '';
-
-                group.remove();
-
-                const { group: finalGroup, contentId: finalContentId, parsed } = createMessageGroup(text, fullResponse, false);
-                elements.messages.appendChild(finalGroup);
-
-                if (parsed.output) {
-                    await typeText(finalContentId, parsed.output, 10);
+                
+                elements.loading.classList.remove('active');
+                
+                // Hapus typing indicator
+                if (contentElement) {
+                    contentElement.innerHTML = '';
                 }
 
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    
+                    buffer += decoder.decode(value, { stream: true });
+                    
+                    // Proses buffer untuk memisahkan JSON dan token
+                    let newlineIndex;
+                    while ((newlineIndex = buffer.indexOf('\n')) !== -1) {
+                        const line = buffer.slice(0, newlineIndex).trim();
+                        buffer = buffer.slice(newlineIndex + 1);
+                        
+                        if (!line) continue;
+                        
+                        // Cek apakah ini JSON
+                        if (line.startsWith('{')) {
+                            try {
+                                const data = JSON.parse(line);
+                                
+                                if (data.type === 'end') {
+                                    // Simpan reasoning
+                                    finalReasoning = data.reasoning || '';
+                                    
+                                    // Tampilkan reasoning jika ada
+                                    if (finalReasoning) {
+                                        const reasoningToggle = group.querySelector('.reasoning-toggle');
+                                        const reasoningContent = group.querySelector('.reasoning-content');
+                                        
+                                        if (reasoningToggle && reasoningContent) {
+                                            reasoningToggle.style.display = 'block';
+                                            reasoningContent.textContent = finalReasoning; // Plain text
+                                        }
+                                    }
+                                }
+                            } catch (e) {
+                                console.warn('Failed to parse JSON:', line);
+                            }
+                        } else {
+                            // Ini adalah token output utama
+                            // Filter tag HTML
+                            const cleanToken = line.replace(/<[^>]*>/g, '');
+                            accumulatedOutput += cleanToken;
+                            
+                            // Render markdown
+                            if (contentElement) {
+                                contentElement.innerHTML = marked.parse(accumulatedOutput, { 
+                                    breaks: true,
+                                    gfm: true,
+                                    headerIds: false,
+                                    mangle: false
+                                });
+                                scrollToBottom();
+                            }
+                        }
+                    }
+                }
+
+                // Final render
+                if (contentElement && accumulatedOutput) {
+                    contentElement.innerHTML = marked.parse(accumulatedOutput, { 
+                        breaks: true,
+                        gfm: true 
+                    });
+                }
+
+                // Simpan ke history dengan format yang benar
+                // Format: jika ada reasoning, simpan sebagai <think>...</think> + output
+                const fullResponse = finalReasoning 
+                    ? `<think>${finalReasoning}</think>\n\n${accumulatedOutput}`
+                    : accumulatedOutput;
+                    
                 saveToHistory(text, fullResponse);
                 renderHistory();
 
             } catch (err) {
+                console.error('Stream error:', err);
                 elements.loading.classList.remove('active');
-                group.remove();
                 
-                const errorText = err.name === 'AbortError' 
-                    ? 'Waktu habis. Silakan coba lagi.' 
-                    : 'Terjadi kesalahan koneksi.';
-                
-                const { group: errorGroup } = createMessageGroup(text, errorText, false);
-                elements.messages.appendChild(errorGroup);
+                // Tampilkan error
+                if (contentElement) {
+                    contentElement.innerHTML = escapeHtml(
+                        err.name === 'AbortError' 
+                            ? 'Waktu habis. Silakan coba lagi.' 
+                            : 'Terjadi kesalahan koneksi.'
+                    );
+                }
             } finally {
                 isProcessing = false;
                 elements.btnSend.disabled = false;
-                abortController = null;
                 scrollToBottom();
             }
         }
 
-        function saveToHistory(userText, aiResponse) {
+        function saveToHistory(userText, rawAiResponse) {
             const chats = getChats();
             const existingIndex = chats.findIndex(c => c.id === currentChatId);
             
@@ -895,8 +911,8 @@
                 title: userText.length > 40 ? userText.substring(0, 40) + '...' : userText,
                 timestamp: new Date().toISOString(),
                 messages: existingIndex >= 0 
-                    ? [...chats[existingIndex].messages, { user: userText, ai: aiResponse }]
-                    : [{ user: userText, ai: aiResponse }]
+                    ? [...chats[existingIndex].messages, { user: userText, ai: rawAiResponse }]
+                    : [{ user: userText, ai: rawAiResponse }]
             };
 
             if (existingIndex >= 0) {
@@ -919,7 +935,46 @@
             elements.messages.innerHTML = '';
 
             chat.messages.forEach(m => {
-                const { group } = createMessageGroup(m.user, m.ai, false);
+                const group = document.createElement('div');
+                group.className = 'message-group';
+                
+                // User message
+                const userDiv = document.createElement('div');
+                userDiv.className = 'message message-user';
+                userDiv.innerHTML = `<div class="message-content">${escapeHtml(m.user)}</div>`;
+                group.appendChild(userDiv);
+
+                // Parse response untuk reasoning
+                const thinkMatch = m.ai.match(/<think>([\s\S]*?)<\/think>/);
+                const reasoning = thinkMatch ? thinkMatch[1].trim() : null;
+                const output = thinkMatch ? m.ai.replace(/<think>[\s\S]*?<\/think>/, '').trim() : m.ai;
+
+                // AI message
+                const aiDiv = document.createElement('div');
+                aiDiv.className = 'message message-ai';
+                
+                let aiHtml = '';
+                
+                if (reasoning) {
+                    aiHtml += `
+                        <div class="reasoning-toggle">
+                            <button class="btn-reasoning" onclick="toggleReasoning(this)">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9 18l6-6-6-6"/>
+                                </svg>
+                                Alur Berpikir
+                            </button>
+                            <div class="reasoning-box">
+                                <div class="reasoning-content">${escapeHtml(reasoning)}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                aiHtml += `<div class="message-content">${marked.parse(output, { breaks: true })}</div>`;
+                aiDiv.innerHTML = aiHtml;
+                group.appendChild(aiDiv);
+                
                 elements.messages.appendChild(group);
             });
 
@@ -962,7 +1017,18 @@
             elements.overlay.classList.toggle('active');
         }
 
-        marked.setOptions({ gfm: true, breaks: true });
+        // Set marked options
+        marked.setOptions({ 
+            gfm: true, 
+            breaks: true, 
+            headerIds: false, 
+            mangle: false,
+            highlight: function(code, lang) {
+                return code;
+            }
+        });
+
+        // Initial render
         renderHistory();
         elements.chatInput.focus();
     </script>
