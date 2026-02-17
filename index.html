@@ -1662,8 +1662,6 @@
            if (!element) return;
            
            element.textContent = text;
-           
-           // Auto scroll to bottom
            element.scrollTop = element.scrollHeight;
        }
 
@@ -1678,7 +1676,6 @@
                status.innerHTML = 'Selesai';
            }
            
-           // Collapse thinking box
            const thinkContent = thinkBox.querySelector('.thinking-content');
            const toggle = thinkBox.querySelector('.thinking-toggle');
            if (thinkContent) thinkContent.classList.remove('expanded');
@@ -1689,7 +1686,6 @@
            const element = document.getElementById(responseContentId);
            if (!element) return;
            
-           // Render markdown + typing indicator
            element.innerHTML = marked.parse(text, { breaks: true }) + 
                `<span class="typing-indicator">
                    <span class="typing-dot"></span>
@@ -1704,9 +1700,7 @@
            const element = document.getElementById(responseContentId);
            if (!element) return;
            
-           // Final render without typing indicator
            element.innerHTML = marked.parse(text, { breaks: true });
-           
            scrollToBottom();
        }
 
@@ -1792,6 +1786,7 @@
            let thinkText = "";
            let responseText = "";
            let isThinking = true;
+           let streamDone = false;
 
            try {
                const response = await fetch(API_CHAT_URL, {
@@ -1822,67 +1817,104 @@
 
                while (true) {
                    const { done, value } = await reader.read();
-                   if (done) break;
+                   if (done || streamDone) break;
 
                    lineBuffer += decoder.decode(value, { stream: true });
 
                    while (lineBuffer.includes("\n")) {
                        const newlineIndex = lineBuffer.indexOf("\n");
-                       const line = lineBuffer.slice(0, newlineIndex).trim();
+                       let line = lineBuffer.slice(0, newlineIndex);
                        lineBuffer = lineBuffer.slice(newlineIndex + 1);
-
+                       
                        if (!line) continue;
-
-                       try {
-                           const data = JSON.parse(line);
-
-                           if (data.type === "think") {
-                               thinkText += data.content;
-                               updateThinkingBox(thinkContentId, thinkText);
-
-                           } else if (data.type === "think_end") {
-                               // Thinking done, switch to response mode
-                               isThinking = false;
-                               markThinkingDone(thinkBoxId);
+                       
+                       // Try to parse as JSON marker
+                       let isMarker = false;
+                       const trimmedLine = line.trim();
+                       
+                       if (trimmedLine.startsWith('{') && trimmedLine.endsWith('}')) {
+                           try {
+                               const data = JSON.parse(trimmedLine);
                                
-                               // Show response section
-                               const responseSection = document.getElementById(responseSectionId);
-                               if (responseSection) {
-                                   responseSection.classList.remove('hidden');
+                               if (data.type === "think") {
+                                   isMarker = true;
+                                   thinkText += data.content || '';
+                                   updateThinkingBox(thinkContentId, thinkText);
+                               } 
+                               else if (data.type === "think_end") {
+                                   isMarker = true;
+                                   isThinking = false;
+                                   markThinkingDone(thinkBoxId);
+                                   
+                                   const responseSection = document.getElementById(responseSectionId);
+                                   if (responseSection) {
+                                       responseSection.classList.remove('hidden');
+                                   }
+                               } 
+                               else if (data.type === "end") {
+                                   isMarker = true;
+                                   streamDone = true;
+                                   break; // Exit inner loop
+                               } 
+                               else if (data.type === "error") {
+                                   isMarker = true;
+                                   throw new Error(data.message);
                                }
-
-                           } else if (data.type === "end") {
-                               // Stream selesai
-                               break;
-
-                           } else if (data.type === "error") {
-                               throw new Error(data.message);
+                               // If JSON but unknown type, treat as text
+                           } catch (e) {
+                               if (!(e instanceof SyntaxError)) throw e;
+                               // Not valid JSON, will be treated as text below
                            }
-
-                       } catch (e) {
-                           if (!(e instanceof SyntaxError)) throw e;
-                           
-                           // Bukan JSON = token response plain text
-                           if (!isThinking) {
-                               responseText += line + '\n';
-                               updateResponseSection(responseContentId, responseText);
-                           }
+                       }
+                       
+                       // Not a marker and not in thinking phase = response text
+                       if (!isMarker && !isThinking) {
+                           responseText += line + '\n';
+                           updateResponseSection(responseContentId, responseText);
                        }
                    }
                }
+               
+               // Process any remaining data in buffer
+               if (lineBuffer.trim() && !streamDone) {
+                   const line = lineBuffer.trim();
+                   let isMarker = false;
+                   
+                   if (line.startsWith('{') && line.endsWith('}')) {
+                       try {
+                           const data = JSON.parse(line);
+                           if (data.type === "end" || data.type === "think_end") {
+                               isMarker = true;
+                           } else if (data.type === "error") {
+                               throw new Error(data.message);
+                           }
+                       } catch (e) {
+                           // Not JSON, treat as text
+                       }
+                   }
+                   
+                   if (!isMarker && !isThinking) {
+                       responseText += line;
+                   }
+               }
 
-               // Finalize response
+               // Clean up any accidental JSON markers in response
+               responseText = responseText.replace(/\{\s*"type"\s*:\s*"end"[\s\S]*?\}\s*$/g, '');
+               responseText = responseText.replace(/\{\s*"type"\s*:\s*"think_end"[\s\S]*?\}\s*$/g, '');
+               responseText = responseText.trim();
+
                finalizeResponse(responseContentId, responseText);
                
-               // Save to history
+               // Save to history with proper format
                const fullResponse = thinkText ? `<think>${thinkText}</think>\n\n${responseText}` : responseText;
                saveToHistory(text, fullResponse);
                renderHistory();
 
            } catch (err) {
                if (err.name === 'AbortError') {
-                   // User cancelled - save what we have
+                   // User cancelled
                    if (responseText.trim() || thinkText.trim()) {
+                       responseText = responseText.replace(/\{\s*"type"\s*:\s*"end"[\s\S]*?\}\s*$/g, '').trim();
                        const fullResponse = thinkText ? `<think>${thinkText}</think>\n\n${responseText}` : responseText;
                        finalizeResponse(responseContentId, responseText);
                        saveToHistory(text, fullResponse);
@@ -1894,7 +1926,6 @@
                    aiRow.remove();
                    const errorText = err.message || 'Terjadi kesalahan koneksi.';
                    
-                   // Create error message
                    const errorRow = document.createElement('div');
                    errorRow.className = 'message-row ai';
                    errorRow.innerHTML = `
@@ -1954,7 +1985,6 @@
                const thinkContent = thinkMatch ? thinkMatch[1] : '';
                const responseContent = m.ai.replace(/<think>[\s\S]*?<\/think>/, '').trim();
                
-               // Create AI row with parsed content
                const aiRow = document.createElement('div');
                aiRow.className = 'message-row ai';
                
