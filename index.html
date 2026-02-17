@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SouGPT · Streaming</title>
+    <title>SouGPT</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         * {
@@ -16,6 +16,7 @@
             --bg-primary: #000000;
             --bg-secondary: #0a0a0a;
             --bg-tertiary: #111111;
+            --bg-user: #1a1a1a;
             --bg-reasoning: #0d0d0d;
             --text-primary: #ffffff;
             --text-secondary: #888888;
@@ -30,14 +31,14 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
-            overflow: hidden;
+            overflow-x: hidden;
         }
 
         .app {
             display: flex;
             flex-direction: column;
             height: 100vh;
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             position: relative;
         }
@@ -50,6 +51,8 @@
             border-bottom: 1px solid var(--border);
             background: var(--bg-primary);
             flex-shrink: 0;
+            min-height: 60px;
+            z-index: 50;
         }
 
         .logo {
@@ -61,6 +64,7 @@
         .header-actions {
             display: flex;
             gap: 12px;
+            align-items: center;
         }
 
         .btn-icon {
@@ -103,6 +107,7 @@
             overflow-y: auto;
             overflow-x: hidden;
             position: relative;
+            background: var(--bg-primary);
         }
 
         .landing {
@@ -160,15 +165,26 @@
         .messages {
             display: none;
             flex-direction: column;
+            padding: 20px 0 100px;
         }
 
         .messages.active {
             display: flex;
         }
 
-        .message-group {
-            border-bottom: 1px solid var(--border);
+        .message-row {
+            display: flex;
+            padding: 12px 20px;
             animation: slideUp 0.3s ease;
+            position: relative;
+        }
+
+        .message-row.user {
+            justify-content: flex-end;
+        }
+
+        .message-row.ai {
+            justify-content: flex-start;
         }
 
         @keyframes slideUp {
@@ -176,16 +192,55 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .message {
-            padding: 20px;
+        .user-bubble {
+            background: var(--bg-user);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 12px 18px;
+            max-width: 80%;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
-        .message-user {
-            background: var(--bg-secondary);
+        .user-bubble:hover {
+            border-color: var(--border-light);
         }
 
-        .message-ai {
-            background: var(--bg-primary);
+        .user-bubble .message-content {
+            font-size: 15px;
+            line-height: 1.5;
+            color: var(--text-primary);
+        }
+
+        .copy-popup {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            z-index: 10;
+        }
+
+        .user-bubble.show-popup .copy-popup {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .ai-content {
+            max-width: 85%;
+            width: 100%;
         }
 
         .message-content {
@@ -261,7 +316,6 @@
 
         .reasoning-toggle {
             margin-bottom: 12px;
-            display: none;
         }
 
         .btn-reasoning {
@@ -296,7 +350,7 @@
         }
 
         .reasoning-box.open {
-            max-height: 500px;
+            max-height: 1000px;
             opacity: 1;
             margin-bottom: 16px;
         }
@@ -310,7 +364,7 @@
             line-height: 1.6;
             color: var(--text-secondary);
             white-space: pre-wrap;
-            font-family: 'SF Mono', 'Menlo', monospace;
+            font-family: inherit;
         }
 
         .typing-indicator {
@@ -333,10 +387,14 @@
         }
 
         .input-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
             padding: 16px 20px 24px;
             background: var(--bg-primary);
             border-top: 1px solid var(--border);
-            flex-shrink: 0;
+            z-index: 40;
         }
 
         .input-wrapper {
@@ -348,6 +406,8 @@
             border-radius: 8px;
             padding: 12px 14px;
             transition: border-color 0.2s;
+            max-width: 900px;
+            margin: 0 auto;
         }
 
         .input-wrapper:focus-within {
@@ -444,6 +504,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            min-height: 60px;
         }
 
         .history-title {
@@ -536,8 +597,17 @@
                 font-size: 22px;
             }
 
-            .message {
-                padding: 16px;
+            .message-row {
+                padding: 10px 16px;
+            }
+
+            .user-bubble {
+                max-width: 85%;
+                padding: 10px 14px;
+            }
+
+            .ai-content {
+                max-width: 95%;
             }
 
             .input-container {
@@ -547,6 +617,15 @@
             .history-panel {
                 width: 100%;
                 right: -100%;
+            }
+
+            .header {
+                padding: 12px 16px;
+                min-height: 56px;
+            }
+
+            .logo {
+                font-size: 16px;
             }
         }
 
@@ -577,9 +656,9 @@
 <body>
     <div class="app">
         <header class="header">
-            <div class="logo">SouGPT · streaming</div>
+            <div class="logo">SouGPT</div>
             <div class="header-actions">
-                <button class="btn-text" onclick="newChat()">Baru</button>
+                <button class="btn-text" onclick="newChat()">Chat Baru</button>
                 <button class="btn-icon" onclick="toggleHistory()" aria-label="History">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M12 20v-6M6 20V10M18 20V4"/>
@@ -630,7 +709,7 @@
     
     <div class="history-panel" id="historyPanel">
         <div class="history-header">
-            <span class="history-title">Riwayat</span>
+            <span class="history-title">Riwayat Chat</span>
             <button class="btn-icon" onclick="toggleHistory()">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -642,12 +721,13 @@
     </div>
 
     <script>
-        // Konfigurasi
-        const API_URL = 'https://sougpt.api.wanzzstoree.my.id/chat/fast'; // Gunakan endpoint streaming
+        const API_URL = 'https://sougpt.api.wanzzstoree.my.id/chat/fast';
         const STORAGE_KEY = 'sougpt_chats_v3';
+        const TIMEOUT_MS = 24 * 60 * 60 * 1000;
 
         let currentChatId = null;
         let isProcessing = false;
+        let abortController = null;
 
         const elements = {
             chatInput: document.getElementById('chatInput'),
@@ -677,6 +757,123 @@
             localStorage.setItem(STORAGE_KEY, JSON.stringify(chats.slice(0, 20)));
         }
 
+        function parseResponse(text) {
+            if (!text) return { hasReasoning: false, reasoning: null, output: '' };
+            
+            const thinkRegex = /<\s*think\s*>([\s\S]*?)<\s*\/\s*think\s*>/gi;
+            const matches = [];
+            let match;
+            
+            while ((match = thinkRegex.exec(text)) !== null) {
+                matches.push(match[1].trim());
+            }
+            
+            if (matches.length > 0) {
+                const reasoning = matches[matches.length - 1];
+                const output = text.replace(thinkRegex, '').trim();
+                return { hasReasoning: true, reasoning, output };
+            }
+            
+            return { hasReasoning: false, reasoning: null, output: text.trim() };
+        }
+
+        function createUserBubble(text) {
+            const row = document.createElement('div');
+            row.className = 'message-row user';
+            
+            const bubble = document.createElement('div');
+            bubble.className = 'user-bubble';
+            
+            const content = document.createElement('div');
+            content.className = 'message-content';
+            content.textContent = text;
+            
+            const popup = document.createElement('div');
+            popup.className = 'copy-popup';
+            popup.innerHTML = `
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                Salin
+            `;
+            
+            bubble.appendChild(content);
+            bubble.appendChild(popup);
+            row.appendChild(bubble);
+            
+            bubble.addEventListener('click', function(e) {
+                if (e.target.closest('.copy-popup')) return;
+                
+                navigator.clipboard.writeText(text).then(() => {
+                    bubble.classList.add('show-popup');
+                    popup.innerHTML = `
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        Tersalin
+                    `;
+                    
+                    setTimeout(() => {
+                        bubble.classList.remove('show-popup');
+                        popup.innerHTML = `
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                            Salin
+                        `;
+                    }, 2000);
+                });
+            });
+            
+            return row;
+        }
+
+        function createAiContent(aiResponse, isTyping = false) {
+            const row = document.createElement('div');
+            row.className = 'message-row ai';
+            
+            const container = document.createElement('div');
+            container.className = 'ai-content';
+            
+            const parsed = parseResponse(aiResponse || '');
+            
+            let html = '';
+            
+            if (parsed.hasReasoning) {
+                html += `
+                    <div class="reasoning-toggle">
+                        <button class="btn-reasoning" onclick="toggleReasoning(this)">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 18l6-6-6-6"/>
+                            </svg>
+                            Alur Berpikir
+                        </button>
+                        <div class="reasoning-box">
+                            <div class="reasoning-content">${escapeHtml(parsed.reasoning)}</div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            const contentId = 'ai-content-' + generateId();
+            html += `<div class="message-content" id="${contentId}">`;
+            
+            if (isTyping) {
+                html += '<span class="typing-indicator"><span class="typing-dot"></span></span>';
+            } else if (parsed.output) {
+                html += marked.parse(parsed.output, { breaks: true });
+            }
+            
+            html += '</div>';
+            
+            container.innerHTML = html;
+            row.appendChild(container);
+            
+            return { row, contentId, parsed };
+        }
+
         function toggleReasoning(btn) {
             const box = btn.nextElementSibling;
             const isOpen = box.classList.contains('open');
@@ -686,6 +883,29 @@
             
             const svg = btn.querySelector('svg');
             svg.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(90deg)';
+        }
+
+        async function typeText(elementId, text, speed = 8) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+
+            let currentText = '';
+            const chars = text.split('');
+            
+            for (let i = 0; i < chars.length; i++) {
+                currentText += chars[i];
+                
+                if (i % 2 === 0 || i === chars.length - 1) {
+                    element.innerHTML = marked.parse(currentText, { breaks: true }) + 
+                        '<span class="typing-indicator"><span class="typing-dot"></span></span>';
+                    scrollToBottom();
+                }
+                
+                await new Promise(r => setTimeout(r, speed));
+            }
+
+            element.innerHTML = marked.parse(text, { breaks: true });
+            scrollToBottom();
         }
 
         function setInput(text) {
@@ -728,7 +948,6 @@
             elements.chatInput.focus();
         }
 
-        // Fungsi utama untuk streaming
         async function sendMessage() {
             const text = elements.chatInput.value.trim();
             if (!text || isProcessing) return;
@@ -742,167 +961,73 @@
             elements.chatInput.value = '';
             autoResize(elements.chatInput);
 
-            // Buat group pesan baru
-            const group = document.createElement('div');
-            group.className = 'message-group';
-            group.dataset.id = generateId();
-
-            // User message
-            const userDiv = document.createElement('div');
-            userDiv.className = 'message message-user';
-            userDiv.innerHTML = `<div class="message-content">${escapeHtml(text)}</div>`;
-            group.appendChild(userDiv);
-
-            // AI message container
-            const aiDiv = document.createElement('div');
-            aiDiv.className = 'message message-ai';
-            aiDiv.innerHTML = `
-                <div class="reasoning-toggle">
-                    <button class="btn-reasoning" onclick="toggleReasoning(this)">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M9 18l6-6-6-6"/>
-                        </svg>
-                        Alur Berpikir
-                    </button>
-                    <div class="reasoning-box">
-                        <div class="reasoning-content"></div>
-                    </div>
-                </div>
-                <div class="message-content" id="content-${group.dataset.id}">
-                    <span class="typing-indicator"><span class="typing-dot"></span></span>
-                </div>
-            `;
+            const userBubble = createUserBubble(text);
+            elements.messages.appendChild(userBubble);
             
-            // Sembunyikan reasoning toggle dulu
-            const reasoningToggle = aiDiv.querySelector('.reasoning-toggle');
-            reasoningToggle.style.display = 'none';
-            
-            group.appendChild(aiDiv);
-            elements.messages.appendChild(group);
+            const { row: aiRow, contentId } = createAiContent('', true);
+            elements.messages.appendChild(aiRow);
             scrollToBottom();
 
             isProcessing = true;
             elements.btnSend.disabled = true;
             elements.loading.classList.add('active');
 
-            let accumulatedOutput = '';
-            let finalReasoning = '';
-            const contentElement = document.getElementById(`content-${group.dataset.id}`);
-            
+            abortController = new AbortController();
+            const timeoutId = setTimeout(() => abortController.abort(), TIMEOUT_MS);
+
             try {
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: text })
+                    body: JSON.stringify({
+                        message: text,
+                        model: 'huihui_ai/gemma3-abliterated:12b',
+                        temperature: 0.7,
+                        max_tokens: 2048,
+                        context_size: 4096
+                    }),
+                    signal: abortController.signal
                 });
 
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                
+                clearTimeout(timeoutId);
                 elements.loading.classList.remove('active');
-                
-                // Hapus typing indicator
-                if (contentElement) {
-                    contentElement.innerHTML = '';
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                const data = await response.json();
+                const fullResponse = data.response || '';
+
+                aiRow.remove();
+
+                const { row: finalRow, contentId: finalContentId, parsed } = createAiContent(fullResponse, false);
+                elements.messages.appendChild(finalRow);
+
+                if (parsed.output) {
+                    await typeText(finalContentId, parsed.output, 8);
                 }
 
-                const reader = response.body.getReader();
-                const decoder = new TextDecoder();
-                let buffer = '';
-
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
-                    
-                    buffer += decoder.decode(value, { stream: true });
-                    
-                    // Proses buffer untuk memisahkan JSON dan token
-                    let newlineIndex;
-                    while ((newlineIndex = buffer.indexOf('\n')) !== -1) {
-                        const line = buffer.slice(0, newlineIndex).trim();
-                        buffer = buffer.slice(newlineIndex + 1);
-                        
-                        if (!line) continue;
-                        
-                        // Cek apakah ini JSON
-                        if (line.startsWith('{')) {
-                            try {
-                                const data = JSON.parse(line);
-                                
-                                if (data.type === 'end') {
-                                    // Simpan reasoning
-                                    finalReasoning = data.reasoning || '';
-                                    
-                                    // Tampilkan reasoning jika ada
-                                    if (finalReasoning) {
-                                        const reasoningToggle = group.querySelector('.reasoning-toggle');
-                                        const reasoningContent = group.querySelector('.reasoning-content');
-                                        
-                                        if (reasoningToggle && reasoningContent) {
-                                            reasoningToggle.style.display = 'block';
-                                            reasoningContent.textContent = finalReasoning; // Plain text
-                                        }
-                                    }
-                                }
-                            } catch (e) {
-                                console.warn('Failed to parse JSON:', line);
-                            }
-                        } else {
-                            // Ini adalah token output utama
-                            // Filter tag HTML
-                            const cleanToken = line.replace(/<[^>]*>/g, '');
-                            accumulatedOutput += cleanToken;
-                            
-                            // Render markdown
-                            if (contentElement) {
-                                contentElement.innerHTML = marked.parse(accumulatedOutput, { 
-                                    breaks: true,
-                                    gfm: true,
-                                    headerIds: false,
-                                    mangle: false
-                                });
-                                scrollToBottom();
-                            }
-                        }
-                    }
-                }
-
-                // Final render
-                if (contentElement && accumulatedOutput) {
-                    contentElement.innerHTML = marked.parse(accumulatedOutput, { 
-                        breaks: true,
-                        gfm: true 
-                    });
-                }
-
-                // Simpan ke history dengan format yang benar
-                // Format: jika ada reasoning, simpan sebagai <think>...</think> + output
-                const fullResponse = finalReasoning 
-                    ? `<think>${finalReasoning}</think>\n\n${accumulatedOutput}`
-                    : accumulatedOutput;
-                    
                 saveToHistory(text, fullResponse);
                 renderHistory();
 
             } catch (err) {
-                console.error('Stream error:', err);
                 elements.loading.classList.remove('active');
+                aiRow.remove();
                 
-                // Tampilkan error
-                if (contentElement) {
-                    contentElement.innerHTML = escapeHtml(
-                        err.name === 'AbortError' 
-                            ? 'Waktu habis. Silakan coba lagi.' 
-                            : 'Terjadi kesalahan koneksi.'
-                    );
-                }
+                const errorText = err.name === 'AbortError' 
+                    ? 'Waktu habis (24 jam). Silakan coba lagi.' 
+                    : 'Terjadi kesalahan koneksi.';
+                
+                const { row: errorRow } = createAiContent(errorText, false);
+                elements.messages.appendChild(errorRow);
             } finally {
                 isProcessing = false;
                 elements.btnSend.disabled = false;
+                abortController = null;
                 scrollToBottom();
             }
         }
 
-        function saveToHistory(userText, rawAiResponse) {
+        function saveToHistory(userText, aiResponse) {
             const chats = getChats();
             const existingIndex = chats.findIndex(c => c.id === currentChatId);
             
@@ -911,8 +1036,8 @@
                 title: userText.length > 40 ? userText.substring(0, 40) + '...' : userText,
                 timestamp: new Date().toISOString(),
                 messages: existingIndex >= 0 
-                    ? [...chats[existingIndex].messages, { user: userText, ai: rawAiResponse }]
-                    : [{ user: userText, ai: rawAiResponse }]
+                    ? [...chats[existingIndex].messages, { user: userText, ai: aiResponse }]
+                    : [{ user: userText, ai: aiResponse }]
             };
 
             if (existingIndex >= 0) {
@@ -935,47 +1060,11 @@
             elements.messages.innerHTML = '';
 
             chat.messages.forEach(m => {
-                const group = document.createElement('div');
-                group.className = 'message-group';
+                const userBubble = createUserBubble(m.user);
+                elements.messages.appendChild(userBubble);
                 
-                // User message
-                const userDiv = document.createElement('div');
-                userDiv.className = 'message message-user';
-                userDiv.innerHTML = `<div class="message-content">${escapeHtml(m.user)}</div>`;
-                group.appendChild(userDiv);
-
-                // Parse response untuk reasoning
-                const thinkMatch = m.ai.match(/<think>([\s\S]*?)<\/think>/);
-                const reasoning = thinkMatch ? thinkMatch[1].trim() : null;
-                const output = thinkMatch ? m.ai.replace(/<think>[\s\S]*?<\/think>/, '').trim() : m.ai;
-
-                // AI message
-                const aiDiv = document.createElement('div');
-                aiDiv.className = 'message message-ai';
-                
-                let aiHtml = '';
-                
-                if (reasoning) {
-                    aiHtml += `
-                        <div class="reasoning-toggle">
-                            <button class="btn-reasoning" onclick="toggleReasoning(this)">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M9 18l6-6-6-6"/>
-                                </svg>
-                                Alur Berpikir
-                            </button>
-                            <div class="reasoning-box">
-                                <div class="reasoning-content">${escapeHtml(reasoning)}</div>
-                            </div>
-                        </div>
-                    `;
-                }
-                
-                aiHtml += `<div class="message-content">${marked.parse(output, { breaks: true })}</div>`;
-                aiDiv.innerHTML = aiHtml;
-                group.appendChild(aiDiv);
-                
-                elements.messages.appendChild(group);
+                const { row: aiRow } = createAiContent(m.ai, false);
+                elements.messages.appendChild(aiRow);
             });
 
             toggleHistory();
@@ -1017,20 +1106,17 @@
             elements.overlay.classList.toggle('active');
         }
 
-        // Set marked options
-        marked.setOptions({ 
-            gfm: true, 
-            breaks: true, 
-            headerIds: false, 
-            mangle: false,
-            highlight: function(code, lang) {
-                return code;
-            }
-        });
-
-        // Initial render
+        marked.setOptions({ gfm: true, breaks: true });
         renderHistory();
         elements.chatInput.focus();
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.user-bubble')) {
+                document.querySelectorAll('.user-bubble.show-popup').forEach(el => {
+                    el.classList.remove('show-popup');
+                });
+            }
+        });
     </script>
 </body>
 </html>
