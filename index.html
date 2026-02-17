@@ -648,56 +648,87 @@
            margin: 24px 0;
        }
 
-       .reasoning-toggle {
-           margin-bottom: 16px;
+       /* Thinking Box Styles */
+       .thinking-box {
+           margin-bottom: 12px;
+           border: 1px solid var(--border);
+           border-radius: 8px;
+           overflow: hidden;
+           transition: all 0.3s ease;
        }
 
-       .btn-reasoning {
-           background: transparent;
-           border: 1px solid var(--border);
-           color: var(--text-secondary);
-           padding: 6px 12px;
-           border-radius: 6px;
-           font-size: 13px;
+       .thinking-box.thinking-done {
+           opacity: 0.7;
+       }
+
+       .thinking-toggle {
+           width: 100%;
+           background: var(--bg-secondary);
+           border: none;
+           padding: 10px 14px;
            cursor: pointer;
            display: flex;
            align-items: center;
-           gap: 6px;
+           gap: 8px;
+           color: var(--text-secondary);
+           font-size: 13px;
            transition: all 0.2s;
+           font-family: inherit;
        }
 
-       .btn-reasoning:hover {
-           border-color: var(--border-light);
-           color: var(--text-primary);
-       }
-
-       .btn-reasoning.active {
+       .thinking-toggle:hover {
            background: var(--bg-tertiary);
            color: var(--text-primary);
        }
 
-       .reasoning-box {
-           max-height: 0;
-           overflow: hidden;
-           transition: all 0.3s ease;
-           opacity: 0;
+       .thinking-toggle svg {
+           transition: transform 0.3s ease;
        }
 
-       .reasoning-box.open {
-           max-height: 2000px;
-           opacity: 1;
-           margin-bottom: 20px;
+       .thinking-toggle.expanded svg {
+           transform: rotate(90deg);
        }
 
-       .reasoning-content {
+       .thinking-status {
+           margin-left: auto;
+           font-size: 12px;
+           color: var(--text-tertiary);
+           font-style: italic;
+           display: flex;
+           align-items: center;
+           gap: 6px;
+       }
+
+       .thinking-content {
            background: var(--bg-reasoning);
-           border: 1px solid var(--border);
-           border-radius: 8px;
-           padding: 16px;
-           font-size: 14px;
+           padding: 0 14px;
+           font-size: 13px;
            line-height: 1.7;
            color: var(--text-secondary);
            white-space: pre-wrap;
+           max-height: 0;
+           overflow: hidden;
+           transition: max-height 0.3s ease, padding 0.3s ease;
+       }
+
+       .thinking-content.expanded {
+           max-height: 500px;
+           padding: 14px;
+           overflow-y: auto;
+       }
+
+       .thinking-done .thinking-status {
+           color: var(--text-tertiary);
+           font-style: normal;
+       }
+
+       /* Response Section */
+       .response-section {
+           transition: all 0.3s ease;
+       }
+
+       .response-section.hidden {
+           display: none;
        }
 
        .typing-indicator {
@@ -950,6 +981,60 @@
            visibility: visible;
        }
 
+       /* Code Block Styles */
+       .code-block-wrapper {
+           margin: 16px 0;
+           border-radius: 8px;
+           overflow: hidden;
+           border: 1px solid var(--border);
+       }
+
+       .code-block-header {
+           display: flex;
+           justify-content: space-between;
+           align-items: center;
+           background: var(--bg-secondary);
+           padding: 8px 14px;
+           border-bottom: 1px solid var(--border);
+       }
+
+       .code-block-lang {
+           font-size: 12px;
+           color: var(--text-secondary);
+           font-family: "SF Mono", Monaco, monospace;
+           text-transform: lowercase;
+       }
+
+       .code-block-copy {
+           background: none;
+           border: none;
+           color: var(--text-secondary);
+           cursor: pointer;
+           padding: 4px 8px;
+           border-radius: 4px;
+           font-size: 12px;
+           display: flex;
+           align-items: center;
+           gap: 6px;
+           transition: all 0.2s;
+       }
+
+       .code-block-copy:hover {
+           background: var(--bg-input);
+           color: var(--text-primary);
+       }
+
+       .code-block-copy.copied {
+           color: var(--accent);
+       }
+
+       .code-block-wrapper pre {
+           margin: 0;
+           border-radius: 0;
+           border: none;
+           background: var(--bg-tertiary);
+       }
+
        @media (max-width: 768px) {
            .intro-logo {
                font-size: 48px;
@@ -1165,7 +1250,7 @@
    <script>
        // API Configuration
        const API_BASE_URL = 'https://sougpt.api.wanzzstoree.my.id';
-       const API_CHAT_URL = `${API_BASE_URL}/chat/fast`;
+       const API_CHAT_URL = `${API_BASE_URL}/chat/stream`;
        const API_LOGIN_URL = `${API_BASE_URL}/auth/login`;
        const API_VERIFY_URL = `${API_BASE_URL}/auth/verify`;
        
@@ -1180,6 +1265,37 @@
        let isProcessing = false;
        let abortController = null;
        let chatHistory = [];
+
+       // Setup marked renderer for code blocks
+       const renderer = new marked.Renderer();
+       
+       renderer.code = function(code, language) {
+           const lang = language || 'code';
+           const escapedCode = code
+               .replace(/&/g, '&amp;')
+               .replace(/</g, '&lt;')
+               .replace(/>/g, '&gt;');
+           
+           const blockId = 'code_' + Math.random().toString(36).substr(2, 9);
+           
+           return `
+               <div class="code-block-wrapper">
+                   <div class="code-block-header">
+                       <span class="code-block-lang">${lang}</span>
+                       <button class="code-block-copy" onclick="copyCode('${blockId}')">
+                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                               <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                               <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                           </svg>
+                           <span>Salin</span>
+                       </button>
+                   </div>
+                   <pre><code id="${blockId}" class="language-${lang}">${escapedCode}</code></pre>
+               </div>
+           `;
+       };
+
+       marked.setOptions({ renderer: renderer, gfm: true, breaks: true });
 
        // DOM Elements
        const elements = {
@@ -1387,27 +1503,29 @@
            return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
        }
 
-       // Chat Functions
-       function parseResponse(text) {
-           if (!text) return { hasReasoning: false, reasoning: null, output: '' };
+       // Copy code function
+       function copyCode(blockId) {
+           const el = document.getElementById(blockId);
+           if (!el) return;
            
-           const thinkRegex = /<\s*think\s*>([\s\S]*?)<\s*\/\s*think\s*>/gi;
-           const matches = [];
-           let match;
-           
-           while ((match = thinkRegex.exec(text)) !== null) {
-               matches.push(match[1].trim());
-           }
-           
-           if (matches.length > 0) {
-               const reasoning = matches[matches.length - 1];
-               const output = text.replace(thinkRegex, '').trim();
-               return { hasReasoning: true, reasoning, output };
-           }
-           
-           return { hasReasoning: false, reasoning: null, output: text.trim() };
+           navigator.clipboard.writeText(el.innerText).then(() => {
+               const btn = el.closest('.code-block-wrapper').querySelector('.code-block-copy');
+               const span = btn.querySelector('span');
+               const svg = btn.querySelector('svg');
+               
+               btn.classList.add('copied');
+               span.textContent = 'Tersalin';
+               svg.innerHTML = '<polyline points="20 6 9 17 4 12"></polyline>';
+               
+               setTimeout(() => {
+                   btn.classList.remove('copied');
+                   span.textContent = 'Salin';
+                   svg.innerHTML = '<rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>';
+               }, 2000);
+           });
        }
 
+       // Chat Functions
        function createUserBubble(text) {
            const row = document.createElement('div');
            row.className = 'message-row user';
@@ -1461,91 +1579,134 @@
            return row;
        }
 
-       function createAiContent(aiResponse, isTyping = false) {
+       function createStreamingAIContent() {
            const row = document.createElement('div');
            row.className = 'message-row ai';
            
            const container = document.createElement('div');
            container.className = 'ai-content';
            
-           const parsed = parseResponse(aiResponse || '');
+           const uniqueId = generateId();
+           const thinkBoxId = `thinkBox_${uniqueId}`;
+           const thinkContentId = `thinkContent_${uniqueId}`;
+           const responseContentId = `responseContent_${uniqueId}`;
            
-           let html = '';
+           // Thinking Box (visible during thinking)
+           const thinkingBox = document.createElement('div');
+           thinkingBox.className = 'thinking-box';
+           thinkingBox.id = thinkBoxId;
+           thinkingBox.innerHTML = `
+               <button class="thinking-toggle" onclick="toggleThinking('${uniqueId}')">
+                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                       <path d="M9 18l6-6-6-6"/>
+                   </svg>
+                   <span class="thinking-label">Alur Berpikir</span>
+                   <span class="thinking-status">
+                       Berpikir
+                       <span class="typing-indicator" style="margin-left: 4px;">
+                           <span class="typing-dot"></span>
+                           <span class="typing-dot"></span>
+                           <span class="typing-dot"></span>
+                       </span>
+                   </span>
+               </button>
+               <div class="thinking-content expanded" id="${thinkContentId}"></div>
+           `;
            
-           if (parsed.hasReasoning) {
-               html += `
-                   <div class="reasoning-toggle">
-                       <button class="btn-reasoning" onclick="toggleReasoning(this)">
-                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                               <path d="M9 18l6-6-6-6"/>
-                           </svg>
-                           Alur Berpikir
-                       </button>
-                       <div class="reasoning-box">
-                           <div class="reasoning-content">${escapeHtml(parsed.reasoning)}</div>
-                       </div>
-                   </div>
-               `;
-           }
-           
-           const contentId = 'ai-content-' + generateId();
-           html += `<div class="message-content" id="${contentId}">`;
-           
-           if (isTyping) {
-               html += `
+           // Response Section (hidden during thinking)
+           const responseSection = document.createElement('div');
+           responseSection.className = 'response-section hidden';
+           responseSection.id = `responseSection_${uniqueId}`;
+           responseSection.innerHTML = `
+               <div class="message-content" id="${responseContentId}">
                    <span class="typing-indicator">
                        <span class="typing-dot"></span>
                        <span class="typing-dot"></span>
                        <span class="typing-dot"></span>
                    </span>
-               `;
-           } else if (parsed.output) {
-               html += marked.parse(parsed.output, { breaks: true });
-           }
+               </div>
+           `;
            
-           html += '</div>';
-           
-           container.innerHTML = html;
+           container.appendChild(thinkingBox);
+           container.appendChild(responseSection);
            row.appendChild(container);
            
-           return { row, contentId, parsed };
+           return { 
+               row, 
+               thinkBoxId, 
+               thinkContentId, 
+               responseContentId,
+               responseSectionId: `responseSection_${uniqueId}`,
+               uniqueId 
+           };
        }
 
-       function toggleReasoning(btn) {
-           const box = btn.nextElementSibling;
-           const isOpen = box.classList.contains('open');
+       function toggleThinking(uniqueId) {
+           const thinkBox = document.getElementById(`thinkBox_${uniqueId}`);
+           const thinkContent = document.getElementById(`thinkContent_${uniqueId}`);
+           const toggle = thinkBox.querySelector('.thinking-toggle');
            
-           box.classList.toggle('open');
-           btn.classList.toggle('active');
+           const isExpanded = thinkContent.classList.contains('expanded');
            
-           const svg = btn.querySelector('svg');
-           svg.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(90deg)';
-       }
-
-       async function typeText(elementId, text, speed = 8) {
-           const element = document.getElementById(elementId);
-           if (!element) return;
-
-           let currentText = '';
-           const chars = text.split('');
-           
-           for (let i = 0; i < chars.length; i++) {
-               currentText += chars[i];
-               
-               if (i % 2 === 0 || i === chars.length - 1) {
-                   element.innerHTML = marked.parse(currentText, { breaks: true }) + 
-                       `<span class="typing-indicator">
-                           <span class="typing-dot"></span>
-                           <span class="typing-dot"></span>
-                           <span class="typing-dot"></span>
-                       </span>`;
-                   scrollToBottom();
-               }
-               
-               await new Promise(r => setTimeout(r, speed));
+           if (isExpanded) {
+               thinkContent.classList.remove('expanded');
+               toggle.classList.remove('expanded');
+           } else {
+               thinkContent.classList.add('expanded');
+               toggle.classList.add('expanded');
            }
+       }
 
+       function updateThinkingBox(thinkContentId, text) {
+           const element = document.getElementById(thinkContentId);
+           if (!element) return;
+           
+           element.textContent = text;
+           
+           // Auto scroll to bottom
+           element.scrollTop = element.scrollHeight;
+       }
+
+       function markThinkingDone(thinkBoxId) {
+           const thinkBox = document.getElementById(thinkBoxId);
+           if (!thinkBox) return;
+           
+           thinkBox.classList.add('thinking-done');
+           
+           const status = thinkBox.querySelector('.thinking-status');
+           if (status) {
+               status.innerHTML = 'Selesai';
+           }
+           
+           // Collapse thinking box
+           const thinkContent = thinkBox.querySelector('.thinking-content');
+           const toggle = thinkBox.querySelector('.thinking-toggle');
+           if (thinkContent) thinkContent.classList.remove('expanded');
+           if (toggle) toggle.classList.remove('expanded');
+       }
+
+       function updateResponseSection(responseContentId, text) {
+           const element = document.getElementById(responseContentId);
+           if (!element) return;
+           
+           // Render markdown + typing indicator
+           element.innerHTML = marked.parse(text, { breaks: true }) + 
+               `<span class="typing-indicator">
+                   <span class="typing-dot"></span>
+                   <span class="typing-dot"></span>
+                   <span class="typing-dot"></span>
+               </span>`;
+           
+           scrollToBottom();
+       }
+
+       function finalizeResponse(responseContentId, text) {
+           const element = document.getElementById(responseContentId);
+           if (!element) return;
+           
+           // Final render without typing indicator
            element.innerHTML = marked.parse(text, { breaks: true });
+           
            scrollToBottom();
        }
 
@@ -1611,7 +1772,14 @@
            const userBubble = createUserBubble(text);
            elements.messages.appendChild(userBubble);
            
-           const { row: aiRow, contentId } = createAiContent('', true);
+           const { 
+               row: aiRow, 
+               thinkBoxId, 
+               thinkContentId, 
+               responseContentId,
+               responseSectionId 
+           } = createStreamingAIContent();
+           
            elements.messages.appendChild(aiRow);
            scrollToBottom();
 
@@ -1620,6 +1788,10 @@
            elements.loading.classList.add('active');
 
            abortController = new AbortController();
+           let lineBuffer = "";
+           let thinkText = "";
+           let responseText = "";
+           let isThinking = true;
 
            try {
                const response = await fetch(API_CHAT_URL, {
@@ -1640,36 +1812,100 @@
 
                if (response.status === 401) {
                    logout();
-                   throw new Error('Sesi habis, silakan login ulang');
+                   return;
                }
 
                if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-               const data = await response.json();
-               const fullResponse = data.response || '';
+               const reader = response.body.getReader();
+               const decoder = new TextDecoder();
 
-               aiRow.remove();
+               while (true) {
+                   const { done, value } = await reader.read();
+                   if (done) break;
 
-               const { row: finalRow, contentId: finalContentId, parsed } = createAiContent(fullResponse, false);
-               elements.messages.appendChild(finalRow);
+                   lineBuffer += decoder.decode(value, { stream: true });
 
-               if (parsed.output) {
-                   await typeText(finalContentId, parsed.output, 6);
+                   while (lineBuffer.includes("\n")) {
+                       const newlineIndex = lineBuffer.indexOf("\n");
+                       const line = lineBuffer.slice(0, newlineIndex).trim();
+                       lineBuffer = lineBuffer.slice(newlineIndex + 1);
+
+                       if (!line) continue;
+
+                       try {
+                           const data = JSON.parse(line);
+
+                           if (data.type === "think") {
+                               thinkText += data.content;
+                               updateThinkingBox(thinkContentId, thinkText);
+
+                           } else if (data.type === "think_end") {
+                               // Thinking done, switch to response mode
+                               isThinking = false;
+                               markThinkingDone(thinkBoxId);
+                               
+                               // Show response section
+                               const responseSection = document.getElementById(responseSectionId);
+                               if (responseSection) {
+                                   responseSection.classList.remove('hidden');
+                               }
+
+                           } else if (data.type === "end") {
+                               // Stream selesai
+                               break;
+
+                           } else if (data.type === "error") {
+                               throw new Error(data.message);
+                           }
+
+                       } catch (e) {
+                           if (!(e instanceof SyntaxError)) throw e;
+                           
+                           // Bukan JSON = token response plain text
+                           if (!isThinking) {
+                               responseText += line + '\n';
+                               updateResponseSection(responseContentId, responseText);
+                           }
+                       }
+                   }
                }
 
+               // Finalize response
+               finalizeResponse(responseContentId, responseText);
+               
+               // Save to history
+               const fullResponse = thinkText ? `<think>${thinkText}</think>\n\n${responseText}` : responseText;
                saveToHistory(text, fullResponse);
                renderHistory();
 
            } catch (err) {
-               elements.loading.classList.remove('active');
-               aiRow.remove();
-               
-               const errorText = err.name === 'AbortError' 
-                   ? 'Permintaan dibatalkan.' 
-                   : err.message || 'Terjadi kesalahan koneksi.';
-               
-               const { row: errorRow } = createAiContent(errorText, false);
-               elements.messages.appendChild(errorRow);
+               if (err.name === 'AbortError') {
+                   // User cancelled - save what we have
+                   if (responseText.trim() || thinkText.trim()) {
+                       const fullResponse = thinkText ? `<think>${thinkText}</think>\n\n${responseText}` : responseText;
+                       finalizeResponse(responseContentId, responseText);
+                       saveToHistory(text, fullResponse);
+                       renderHistory();
+                   } else {
+                       aiRow.remove();
+                   }
+               } else {
+                   aiRow.remove();
+                   const errorText = err.message || 'Terjadi kesalahan koneksi.';
+                   
+                   // Create error message
+                   const errorRow = document.createElement('div');
+                   errorRow.className = 'message-row ai';
+                   errorRow.innerHTML = `
+                       <div class="ai-content">
+                           <div class="message-content" style="color: var(--error);">
+                               ${escapeHtml(errorText)}
+                           </div>
+                       </div>
+                   `;
+                   elements.messages.appendChild(errorRow);
+               }
            } finally {
                isProcessing = false;
                elements.btnSend.disabled = false;
@@ -1713,7 +1949,36 @@
                const userBubble = createUserBubble(m.user);
                elements.messages.appendChild(userBubble);
                
-               const { row: aiRow } = createAiContent(m.ai, false);
+               // Parse thinking and response
+               const thinkMatch = m.ai.match(/<think>([\s\S]*?)<\/think>/);
+               const thinkContent = thinkMatch ? thinkMatch[1] : '';
+               const responseContent = m.ai.replace(/<think>[\s\S]*?<\/think>/, '').trim();
+               
+               // Create AI row with parsed content
+               const aiRow = document.createElement('div');
+               aiRow.className = 'message-row ai';
+               
+               let html = '<div class="ai-content">';
+               
+               if (thinkContent) {
+                   html += `
+                       <div class="thinking-box thinking-done">
+                           <button class="thinking-toggle" onclick="this.nextElementSibling.classList.toggle('expanded'); this.classList.toggle('expanded')">
+                               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                   <path d="M9 18l6-6-6-6"/>
+                               </svg>
+                               <span class="thinking-label">Alur Berpikir</span>
+                               <span class="thinking-status">Selesai</span>
+                           </button>
+                           <div class="thinking-content">${escapeHtml(thinkContent)}</div>
+                       </div>
+                   `;
+               }
+               
+               html += `<div class="message-content">${marked.parse(responseContent, { breaks: true })}</div>`;
+               html += '</div>';
+               
+               aiRow.innerHTML = html;
                elements.messages.appendChild(aiRow);
            });
 
@@ -1784,8 +2049,6 @@
                });
            }
        });
-
-       marked.setOptions({ gfm: true, breaks: true });
    </script>
 </body>
 </html>
