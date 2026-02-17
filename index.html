@@ -28,6 +28,19 @@
            --error: #ef4146;
        }
 
+       [data-theme="light"] {
+           --bg-primary: #ffffff;
+           --bg-secondary: #f7f7f8;
+           --bg-tertiary: #ececf1;
+           --bg-input: #f7f7f8;
+           --bg-reasoning: #f0f0f0;
+           --text-primary: #343541;
+           --text-secondary: #6e6e80;
+           --text-tertiary: #acacbe;
+           --border: #d9d9e3;
+           --border-light: #c5c5d2;
+       }
+
        html, body {
            height: 100%;
            font-family: "Söhne", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -40,7 +53,6 @@
            display: none !important;
        }
 
-       /* Intro Animation */
        .intro-screen {
            position: fixed;
            top: 0;
@@ -132,7 +144,6 @@
            40% { transform: scale(1); opacity: 1; }
        }
 
-       /* Login Page */
        .login-page {
            position: fixed;
            top: 0;
@@ -267,7 +278,6 @@
            to { transform: rotate(360deg); }
        }
 
-       /* Main App */
        .app {
            display: flex;
            flex-direction: column;
@@ -394,7 +404,7 @@
            border: 1px solid var(--border);
            border-radius: 8px;
            padding: 4px;
-           min-width: 180px;
+           min-width: 200px;
            opacity: 0;
            visibility: hidden;
            transform: translateY(-10px);
@@ -434,7 +444,6 @@
            color: var(--error);
        }
 
-       /* Chat Area */
        .chat-wrapper {
            flex: 1;
            overflow-y: auto;
@@ -575,6 +584,10 @@
            color: var(--text-primary);
        }
 
+       .message-content.font-small { font-size: 14px; }
+       .message-content.font-medium { font-size: 16px; }
+       .message-content.font-large { font-size: 18px; }
+
        .message-content p {
            margin-bottom: 12px;
        }
@@ -648,7 +661,6 @@
            margin: 24px 0;
        }
 
-       /* Thinking Box Styles */
        .thinking-box {
            margin-bottom: 12px;
            border: 1px solid var(--border);
@@ -722,7 +734,6 @@
            font-style: normal;
        }
 
-       /* Response Section */
        .response-section {
            transition: all 0.3s ease;
        }
@@ -755,7 +766,6 @@
            40% { transform: scale(1); opacity: 1; }
        }
 
-       /* Input Area */
        .input-container {
            position: fixed;
            bottom: 0;
@@ -826,6 +836,31 @@
            cursor: not-allowed;
        }
 
+       .btn-stop {
+           background: #ef4146;
+           color: white;
+           border: none;
+           width: 32px;
+           height: 32px;
+           border-radius: 6px;
+           cursor: pointer;
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           transition: all 0.2s;
+           flex-shrink: 0;
+           animation: pulseRed 1.5s ease-in-out infinite;
+       }
+
+       @keyframes pulseRed {
+           0%, 100% { box-shadow: 0 0 0 0 rgba(239, 65, 70, 0.7); }
+           50% { box-shadow: 0 0 0 8px rgba(239, 65, 70, 0); }
+       }
+
+       .btn-stop:hover {
+           background: #dc2626;
+       }
+
        .loading-container {
            display: none;
            padding: 32px;
@@ -840,20 +875,10 @@
            display: flex;
        }
 
-       .loading-pulse {
-           width: 8px;
-           height: 8px;
-           background: var(--text-primary);
-           border-radius: 50%;
-           animation: pulse 1.5s ease-in-out infinite;
+       .loading-status {
+           font-style: italic;
        }
 
-       @keyframes pulse {
-           0%, 100% { transform: scale(1); opacity: 0.5; }
-           50% { transform: scale(1.5); opacity: 1; }
-       }
-
-       /* History Sidebar */
        .history-panel {
            position: fixed;
            top: 0;
@@ -890,6 +915,47 @@
            gap: 8px;
        }
 
+       .history-search {
+           padding: 8px;
+           border-bottom: 1px solid var(--border);
+       }
+
+       .history-search-wrapper {
+           position: relative;
+       }
+
+       .history-search-input {
+           width: 100%;
+           background: var(--bg-primary);
+           border: 1px solid var(--border);
+           border-radius: 6px;
+           padding: 8px 32px 8px 12px;
+           color: var(--text-primary);
+           font-size: 13px;
+           outline: none;
+       }
+
+       .history-search-input:focus {
+           border-color: var(--border-light);
+       }
+
+       .history-search-clear {
+           position: absolute;
+           right: 8px;
+           top: 50%;
+           transform: translateY(-50%);
+           background: none;
+           border: none;
+           color: var(--text-tertiary);
+           cursor: pointer;
+           font-size: 16px;
+           display: none;
+       }
+
+       .history-search-clear.show {
+           display: block;
+       }
+
        .history-list {
            flex: 1;
            overflow-y: auto;
@@ -897,6 +963,13 @@
        }
 
        .empty-history {
+           text-align: center;
+           padding: 40px 20px;
+           color: var(--text-tertiary);
+           font-size: 14px;
+       }
+
+       .no-results {
            text-align: center;
            padding: 40px 20px;
            color: var(--text-tertiary);
@@ -922,6 +995,10 @@
            background: var(--bg-tertiary);
        }
 
+       .history-item.pinned {
+           border-left: 3px solid var(--accent);
+       }
+
        .history-text {
            flex: 1;
            overflow: hidden;
@@ -940,6 +1017,36 @@
        .history-time {
            font-size: 12px;
            color: var(--text-tertiary);
+       }
+
+       .history-actions-item {
+           display: flex;
+           gap: 4px;
+       }
+
+       .history-pin {
+           background: none;
+           border: none;
+           color: var(--text-tertiary);
+           cursor: pointer;
+           padding: 6px;
+           border-radius: 4px;
+           opacity: 0;
+           transition: all 0.2s;
+       }
+
+       .history-item:hover .history-pin {
+           opacity: 1;
+       }
+
+       .history-pin:hover {
+           color: var(--accent);
+           background: rgba(16, 163, 127, 0.1);
+       }
+
+       .history-pin.pinned {
+           opacity: 1;
+           color: var(--accent);
        }
 
        .history-delete {
@@ -981,7 +1088,127 @@
            visibility: visible;
        }
 
-       /* Code Block Styles */
+       .settings-panel {
+           position: fixed;
+           top: 0;
+           left: -320px;
+           width: 320px;
+           height: 100vh;
+           background: var(--bg-secondary);
+           border-right: 1px solid var(--border);
+           z-index: 100;
+           transition: left 0.3s ease;
+           display: flex;
+           flex-direction: column;
+       }
+
+       .settings-panel.open {
+           left: 0;
+       }
+
+       .settings-header {
+           padding: 16px;
+           border-bottom: 1px solid var(--border);
+           display: flex;
+           justify-content: space-between;
+           align-items: center;
+       }
+
+       .settings-title {
+           font-size: 16px;
+           font-weight: 600;
+       }
+
+       .settings-content {
+           flex: 1;
+           overflow-y: auto;
+           padding: 16px;
+       }
+
+       .settings-section {
+           margin-bottom: 24px;
+       }
+
+       .settings-section-title {
+           font-size: 13px;
+           font-weight: 600;
+           color: var(--text-secondary);
+           text-transform: uppercase;
+           margin-bottom: 12px;
+           letter-spacing: 0.5px;
+       }
+
+       .settings-option {
+           margin-bottom: 12px;
+       }
+
+       .settings-label {
+           display: block;
+           font-size: 14px;
+           color: var(--text-primary);
+           margin-bottom: 8px;
+       }
+
+       .settings-radio-group {
+           display: flex;
+           flex-direction: column;
+           gap: 8px;
+       }
+
+       .settings-radio {
+           display: flex;
+           align-items: center;
+           gap: 8px;
+           cursor: pointer;
+           padding: 8px;
+           border-radius: 6px;
+           transition: background 0.2s;
+       }
+
+       .settings-radio:hover {
+           background: var(--bg-tertiary);
+       }
+
+       .settings-radio input {
+           cursor: pointer;
+       }
+
+       .settings-radio span {
+           font-size: 14px;
+           color: var(--text-secondary);
+       }
+
+       .settings-radio input:checked + span {
+           color: var(--text-primary);
+       }
+
+       .settings-info {
+           background: var(--bg-tertiary);
+           padding: 12px;
+           border-radius: 6px;
+           margin-top: 8px;
+       }
+
+       .settings-info-row {
+           display: flex;
+           justify-content: space-between;
+           margin-bottom: 8px;
+           font-size: 13px;
+       }
+
+       .settings-info-row:last-child {
+           margin-bottom: 0;
+       }
+
+       .settings-info-label {
+           color: var(--text-secondary);
+       }
+
+       .settings-info-value {
+           color: var(--text-primary);
+           font-weight: 500;
+       }
+
        .code-block-wrapper {
            margin: 16px 0;
            border-radius: 8px;
@@ -1035,6 +1262,95 @@
            background: var(--bg-tertiary);
        }
 
+       .custom-notif {
+           position: fixed;
+           bottom: 90px;
+           left: 50%;
+           transform: translateX(-50%) translateY(20px);
+           padding: 12px 20px;
+           border-radius: 8px;
+           color: white;
+           font-size: 14px;
+           font-weight: 500;
+           opacity: 0;
+           transition: all 0.3s ease;
+           z-index: 9999;
+           white-space: nowrap;
+           box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+           pointer-events: none;
+       }
+
+       .custom-notif.show {
+           opacity: 1;
+           transform: translateX(-50%) translateY(0);
+       }
+
+       .stopped-indicator {
+           font-size: 13px;
+           color: var(--text-secondary);
+           font-style: italic;
+           margin-top: 8px;
+           display: flex;
+           align-items: center;
+           gap: 6px;
+       }
+
+       @media print {
+           body {
+               background: white !important;
+               color: black !important;
+           }
+           
+           .header,
+           .input-container,
+           .history-panel,
+           .settings-panel,
+           .overlay,
+           .btn-icon,
+           .btn-text,
+           .user-menu,
+           .intro-screen,
+           .login-page,
+           .custom-notif {
+               display: none !important;
+           }
+           
+           .app {
+               opacity: 1 !important;
+               visibility: visible !important;
+               max-width: 100% !important;
+           }
+           
+           .chat-wrapper {
+               overflow: visible !important;
+           }
+           
+           .messages {
+               display: flex !important;
+               padding-bottom: 0 !important;
+           }
+           
+           .message-row {
+               break-inside: avoid;
+               background: white !important;
+               color: black !important;
+           }
+           
+           .message-row.user {
+               background: #f0f0f0 !important;
+           }
+           
+           .ai-content {
+               max-width: 100% !important;
+           }
+           
+           .thinking-box,
+           .btn-reasoning,
+           .thinking-toggle {
+               display: none !important;
+           }
+       }
+
        @media (max-width: 768px) {
            .intro-logo {
                font-size: 48px;
@@ -1060,9 +1376,20 @@
                max-width: 100%;
            }
 
-           .history-panel {
+           .history-panel,
+           .settings-panel {
                width: 100%;
                right: -100%;
+               left: auto;
+           }
+
+           .settings-panel {
+               left: -100%;
+               right: auto;
+           }
+
+           .settings-panel.open {
+               left: 0;
            }
        }
 
@@ -1086,7 +1413,8 @@
    </style>
 </head>
 <body>
-   <!-- Intro Screen -->
+   <div class="custom-notif" id="customNotif"></div>
+
    <div class="intro-screen" id="introScreen">
        <div class="intro-content">
            <div class="intro-logo">
@@ -1098,37 +1426,33 @@
                    <span class="intro-dot"></span>
                </span>
            </div>
-           <div class="intro-tagline" id="introTagline">
-               Intelligence without limits. Ethics without boundaries.
-           </div>
+           <div class="intro-tagline" id="introTagline"></div>
        </div>
    </div>
 
-   <!-- Login Page -->
    <div class="login-page" id="loginPage">
        <div class="login-card">
            <div class="login-header">
                <div class="login-logo-small">SouGPT</div>
-               <div class="login-subtitle">Selamat datang kembali</div>
+               <div class="login-subtitle" id="loginSubtitle"></div>
            </div>
            <form id="loginForm" onsubmit="handleLogin(event)">
                <div class="form-group">
-                   <label class="form-label">Username</label>
-                   <input type="text" class="form-input" id="usernameInput" placeholder="Masukkan username" required autocomplete="username">
+                   <label class="form-label" id="usernameLabel"></label>
+                   <input type="text" class="form-input" id="usernameInput" required autocomplete="username">
                </div>
                <div class="form-group">
-                   <label class="form-label">Password</label>
-                   <input type="password" class="form-input" id="passwordInput" placeholder="Masukkan password" required autocomplete="current-password">
+                   <label class="form-label" id="passwordLabel"></label>
+                   <input type="password" class="form-input" id="passwordInput" required autocomplete="current-password">
                </div>
                <button type="submit" class="login-btn" id="loginBtn">
-                   <span id="loginBtnText">Masuk</span>
+                   <span id="loginBtnText"></span>
                </button>
            </form>
            <div class="error-message" id="errorMessage"></div>
        </div>
    </div>
 
-   <!-- Main App -->
    <div class="app" id="mainApp">
        <header class="header">
            <div class="header-left">
@@ -1141,12 +1465,18 @@
                </div>
            </div>
            <div class="header-actions">
-               <button class="btn-text" onclick="newChat()">
+               <button class="btn-text" onclick="newChat()" id="btnNewChat">
                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                        <line x1="12" y1="5" x2="12" y2="19"></line>
                        <line x1="5" y1="12" x2="19" y2="12"></line>
                    </svg>
-                   Baru
+                   <span id="newChatText">Baru</span>
+               </button>
+               <button class="btn-icon" onclick="toggleSettings()" title="Settings">
+                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                       <circle cx="12" cy="12" r="3"></circle>
+                       <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                   </svg>
                </button>
                <button class="btn-icon" onclick="toggleHistory()">
                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1164,13 +1494,31 @@
                            <span id="dropdownUsername">User</span>
                        </div>
                        <div class="dropdown-divider"></div>
+                       <div class="dropdown-item" onclick="exportChat('markdown')">
+                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                               <polyline points="14 2 14 8 20 8"></polyline>
+                               <line x1="16" y1="13" x2="8" y2="13"></line>
+                               <line x1="16" y1="17" x2="8" y2="17"></line>
+                               <polyline points="10 9 9 9 8 9"></polyline>
+                           </svg>
+                           <span id="exportMdText">Export sebagai Markdown</span>
+                       </div>
+                       <div class="dropdown-item" onclick="exportChat('pdf')">
+                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                               <polyline points="14 2 14 8 20 8"></polyline>
+                           </svg>
+                           <span id="exportPdfText">Export sebagai PDF</span>
+                       </div>
+                       <div class="dropdown-divider"></div>
                        <div class="dropdown-item danger" onclick="logout()">
                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
                                <polyline points="16 17 21 12 16 7"></polyline>
                                <line x1="21" y1="12" x2="9" y2="12"></line>
                            </svg>
-                           Keluar
+                           <span id="logoutText">Keluar</span>
                        </div>
                    </div>
                </div>
@@ -1179,7 +1527,7 @@
 
        <div class="chat-wrapper" id="chatWrapper">
            <div class="landing" id="landing">
-               <h1 class="landing-title">Apa yang bisa saya bantu?</h1>
+               <h1 class="landing-title" id="landingTitle"></h1>
                <div class="suggestions">
                    <div class="suggestion-item" onclick="setInput('Jelaskan konsep quantum computing dalam bahasa sederhana')">
                        Jelaskan konsep quantum computing dalam bahasa sederhana
@@ -1200,7 +1548,7 @@
            
            <div class="loading-container" id="loadingContainer">
                <div class="loading-pulse"></div>
-               <span>SouGPT sedang berpikir...</span>
+               <span class="loading-status" id="loadingStatus"></span>
            </div>
        </div>
 
@@ -1209,7 +1557,6 @@
                <textarea 
                    class="chat-input" 
                    id="chatInput" 
-                   placeholder="Ketik pesan..." 
                    rows="1"
                    onkeydown="handleKeydown(event)"
                    oninput="autoResize(this)"
@@ -1220,15 +1567,97 @@
                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
                    </svg>
                </button>
+               <button class="btn-stop hidden" id="btnStop" onclick="stopGeneration()">
+                   <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                       <rect x="6" y="6" width="12" height="12" rx="2"></rect>
+                   </svg>
+               </button>
            </div>
        </div>
    </div>
 
-   <div class="overlay" id="overlay" onclick="toggleHistory()"></div>
+   <div class="overlay" id="overlay" onclick="closePanels()"></div>
+   
+   <div class="settings-panel" id="settingsPanel">
+       <div class="settings-header">
+           <span class="settings-title" id="settingsTitle">Pengaturan</span>
+           <button class="btn-icon" onclick="toggleSettings()">
+               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                   <line x1="18" y1="6" x2="6" y2="18"></line>
+                   <line x1="6" y1="6" x2="18" y2="18"></line>
+               </svg>
+           </button>
+       </div>
+       <div class="settings-content">
+           <div class="settings-section">
+               <div class="settings-section-title" id="displayTitle">Tampilan</div>
+               <div class="settings-option">
+                   <label class="settings-label" id="themeLabel">Mode</label>
+                   <div class="settings-radio-group">
+                       <label class="settings-radio">
+                           <input type="radio" name="theme" value="dark" onchange="setTheme('dark')">
+                           <span id="themeDark">Gelap</span>
+                       </label>
+                       <label class="settings-radio">
+                           <input type="radio" name="theme" value="light" onchange="setTheme('light')">
+                           <span id="themeLight">Terang</span>
+                       </label>
+                       <label class="settings-radio">
+                           <input type="radio" name="theme" value="system" onchange="setTheme('system')">
+                           <span id="themeSystem">Sistem</span>
+                       </label>
+                   </div>
+               </div>
+               <div class="settings-option">
+                   <label class="settings-label" id="fontSizeLabel">Ukuran Font</label>
+                   <div class="settings-radio-group">
+                       <label class="settings-radio">
+                           <input type="radio" name="fontsize" value="small" onchange="setFontSize('small')">
+                           <span id="fontSmall">Kecil</span>
+                       </label>
+                       <label class="settings-radio">
+                           <input type="radio" name="fontsize" value="medium" onchange="setFontSize('medium')">
+                           <span id="fontMedium">Sedang</span>
+                       </label>
+                       <label class="settings-radio">
+                           <input type="radio" name="fontsize" value="large" onchange="setFontSize('large')">
+                           <span id="fontLarge">Besar</span>
+                       </label>
+                   </div>
+               </div>
+               <div class="settings-option">
+                   <label class="settings-label" id="languageLabel">Bahasa</label>
+                   <div class="settings-radio-group">
+                       <label class="settings-radio">
+                           <input type="radio" name="language" value="id" onchange="setLanguage('id')">
+                           <span>Indonesia</span>
+                       </label>
+                       <label class="settings-radio">
+                           <input type="radio" name="language" value="en" onchange="setLanguage('en')">
+                           <span>English</span>
+                       </label>
+                   </div>
+               </div>
+           </div>
+           <div class="settings-section">
+               <div class="settings-section-title" id="accountTitle">Akun</div>
+               <div class="settings-info">
+                   <div class="settings-info-row">
+                       <span class="settings-info-label" id="usernameInfoLabel">Username</span>
+                       <span class="settings-info-value" id="settingsUsername">-</span>
+                   </div>
+                   <div class="settings-info-row">
+                       <span class="settings-info-label" id="memberSinceLabel">Anggota sejak</span>
+                       <span class="settings-info-value" id="settingsMemberSince">-</span>
+                   </div>
+               </div>
+           </div>
+       </div>
+   </div>
    
    <div class="history-panel" id="historyPanel">
        <div class="history-header">
-           <span class="history-title">Riwayat Chat</span>
+           <span class="history-title" id="historyTitle">Riwayat Chat</span>
            <div class="history-actions">
                <button class="btn-icon" onclick="clearAllHistory()" title="Hapus Semua">
                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1244,11 +1673,16 @@
                </button>
            </div>
        </div>
+       <div class="history-search">
+           <div class="history-search-wrapper">
+               <input type="text" class="history-search-input" id="historySearch" placeholder="Cari riwayat..." oninput="searchHistory(this.value)">
+               <button class="history-search-clear" id="historySearchClear" onclick="clearHistorySearch()">×</button>
+           </div>
+       </div>
        <div class="history-list" id="historyList"></div>
    </div>
 
    <script>
-       // API Configuration
        const API_BASE_URL = 'https://sougpt.api.wanzzstoree.my.id';
        const API_CHAT_URL = `${API_BASE_URL}/chat/stream`;
        const API_LOGIN_URL = `${API_BASE_URL}/auth/login`;
@@ -1257,47 +1691,151 @@
        const STORAGE_TOKEN_KEY = 'sougpt_token';
        const STORAGE_USERNAME_KEY = 'sougpt_username';
        const STORAGE_HISTORY_KEY = 'chatHistory';
+       const STORAGE_PINNED_KEY = 'sougpt_pinned';
+       const STORAGE_THEME_KEY = 'sougpt_theme';
+       const STORAGE_FONTSIZE_KEY = 'sougpt_fontsize';
+       const STORAGE_LANG_KEY = 'sougpt_lang';
+       const STORAGE_FIRST_LOGIN_KEY = 'sougpt_first_login';
 
-       // State
+       const loadingStatuses = [
+           "AI Sedang Memproses...",
+           "AI Sedang Merakit...",
+           "AI Sedang Membuat Referensi...",
+           "Menganalisis Pertanyaan...",
+           "Menyusun Jawaban...",
+           "Mencari Konteks...",
+           "Memproses Data...",
+           "Merumuskan Respons...",
+           "Mengoptimalkan Output...",
+           "Memeriksa Akurasi...",
+           "Menyempurnakan Kalimat...",
+           "Menghubungkan Informasi...",
+           "Memvalidasi Jawaban...",
+           "Menyaring Referensi...",
+           "Mengkalkulasi Respons...",
+           "Membangun Struktur...",
+           "Mengevaluasi Konteks...",
+           "Memperkaya Detail...",
+           "Menyelaraskan Informasi...",
+           "Menyesuaikan Gaya Bahasa...",
+           "Memfinalisasi Output...",
+           "Mengecek Konsistensi...",
+           "Menyempurnakan Detail...",
+           "Memproses Logika...",
+           "Menghitung Probabilitas...",
+           "Menyaring Noise Data...",
+           "Mengintegrasikan Referensi...",
+           "Membangun Argumen...",
+           "Mengoptimalkan Kalimat...",
+           "Menyelesaikan Kalkulasi...",
+           "Memeriksa Ulang...",
+           "Merapikan Format Output...",
+           "Hampir Selesai..."
+       ];
+
+       const translations = {
+           id: {
+               tagline: "Intelligence without limits. Ethics without boundaries.",
+               loginSubtitle: "Selamat datang kembali",
+               usernameLabel: "Username",
+               passwordLabel: "Password",
+               loginBtn: "Masuk",
+               inputPlaceholder: "Ketik pesan...",
+               newChat: "Baru",
+               landingTitle: "Apa yang bisa saya bantu?",
+               historyTitle: "Riwayat Chat",
+               clearAll: "Hapus Semua",
+               emptyHistory: "Belum ada riwayat chat",
+               noResults: "Tidak ada hasil untuk",
+               exportMd: "Export sebagai Markdown",
+               exportPdf: "Export sebagai PDF",
+               logout: "Keluar",
+               settings: "Pengaturan",
+               display: "Tampilan",
+               theme: "Mode",
+               themeDark: "Gelap",
+               themeLight: "Terang",
+               themeSystem: "Sistem",
+               fontSize: "Ukuran Font",
+               fontSmall: "Kecil",
+               fontMedium: "Sedang",
+               fontLarge: "Besar",
+               language: "Bahasa",
+               account: "Akun",
+               username: "Username",
+               memberSince: "Anggota sejak",
+               searchPlaceholder: "Cari riwayat...",
+               stoppedByUser: "Dihentikan oleh pengguna",
+               offline: "Koneksi internet terputus",
+               serverDown: "Server tidak dapat dijangkau",
+               online: "Koneksi kembali normal"
+           },
+           en: {
+               tagline: "Intelligence without limits. Ethics without boundaries.",
+               loginSubtitle: "Welcome back",
+               usernameLabel: "Username",
+               passwordLabel: "Password",
+               loginBtn: "Login",
+               inputPlaceholder: "Type a message...",
+               newChat: "New",
+               landingTitle: "What can I help you with?",
+               historyTitle: "Chat History",
+               clearAll: "Clear All",
+               emptyHistory: "No chat history yet",
+               noResults: "No results for",
+               exportMd: "Export as Markdown",
+               exportPdf: "Export as PDF",
+               logout: "Logout",
+               settings: "Settings",
+               display: "Display",
+               theme: "Theme",
+               themeDark: "Dark",
+               themeLight: "Light",
+               themeSystem: "System",
+               fontSize: "Font Size",
+               fontSmall: "Small",
+               fontMedium: "Medium",
+               fontLarge: "Large",
+               language: "Language",
+               account: "Account",
+               username: "Username",
+               memberSince: "Member since",
+               searchPlaceholder: "Search history...",
+               stoppedByUser: "Stopped by user",
+               offline: "Internet connection lost",
+               serverDown: "Server unreachable",
+               online: "Connection restored"
+           }
+       };
+
        let currentToken = null;
        let currentUsername = null;
        let currentChatId = null;
        let isProcessing = false;
+       let isStreaming = false;
        let abortController = null;
        let chatHistory = [];
+       let pinnedChats = [];
+       let loadingStatusInterval = null;
+       let currentLang = 'id';
+       let currentTheme = 'dark';
+       let currentFontSize = 'medium';
+       let searchQuery = '';
 
-       // Setup marked renderer for code blocks
        const renderer = new marked.Renderer();
        
-       renderer.code = function(code, language) {
-           const lang = language || 'code';
-           const escapedCode = code
+       renderer.code = function({ text, lang }) {
+           const language = lang || 'code';
+           const escapedCode = text
                .replace(/&/g, '&amp;')
                .replace(/</g, '&lt;')
                .replace(/>/g, '&gt;');
-           
            const blockId = 'code_' + Math.random().toString(36).substr(2, 9);
-           
-           return `
-               <div class="code-block-wrapper">
-                   <div class="code-block-header">
-                       <span class="code-block-lang">${lang}</span>
-                       <button class="code-block-copy" onclick="copyCode('${blockId}')">
-                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                               <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                               <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                           </svg>
-                           <span>Salin</span>
-                       </button>
-                   </div>
-                   <pre><code id="${blockId}" class="language-${lang}">${escapedCode}</code></pre>
-               </div>
-           `;
+           return `<div class="code-block-wrapper"><div class="code-block-header"><span class="code-block-lang">${language}</span><button class="code-block-copy" onclick="copyCode('${blockId}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg><span>Salin</span></button></div><pre><code id="${blockId}" class="language-${language}">${escapedCode}</code></pre></div>`;
        };
 
        marked.setOptions({ renderer: renderer, gfm: true, breaks: true });
 
-       // DOM Elements
        const elements = {
            introScreen: document.getElementById('introScreen'),
            introText: document.getElementById('introText'),
@@ -1317,16 +1855,21 @@
            userDropdown: document.getElementById('userDropdown'),
            chatInput: document.getElementById('chatInput'),
            btnSend: document.getElementById('btnSend'),
+           btnStop: document.getElementById('btnStop'),
            messages: document.getElementById('messages'),
            landing: document.getElementById('landing'),
            loading: document.getElementById('loadingContainer'),
+           loadingStatus: document.getElementById('loadingStatus'),
            chatWrapper: document.getElementById('chatWrapper'),
            historyPanel: document.getElementById('historyPanel'),
+           settingsPanel: document.getElementById('settingsPanel'),
            overlay: document.getElementById('overlay'),
-           historyList: document.getElementById('historyList')
+           historyList: document.getElementById('historyList'),
+           historySearch: document.getElementById('historySearch'),
+           historySearchClear: document.getElementById('historySearchClear'),
+           customNotif: document.getElementById('customNotif')
        };
 
-       // Intro Animation
        async function playIntro() {
            const text = 'SouGPT';
            const chars = text.split('');
@@ -1355,10 +1898,92 @@
            checkAuth();
        }
 
-       // Initialize
        document.addEventListener('DOMContentLoaded', playIntro);
 
-       // Auth Functions
+       function initSettings() {
+           const savedTheme = localStorage.getItem(STORAGE_THEME_KEY) || 'dark';
+           const savedFontSize = localStorage.getItem(STORAGE_FONTSIZE_KEY) || 'medium';
+           const savedLang = localStorage.getItem(STORAGE_LANG_KEY) || 'id';
+           
+           setTheme(savedTheme, false);
+           setFontSize(savedFontSize, false);
+           setLanguage(savedLang, false);
+       }
+
+       function setTheme(theme, save = true) {
+           currentTheme = theme;
+           if (save) localStorage.setItem(STORAGE_THEME_KEY, theme);
+           
+           document.querySelectorAll('input[name="theme"]').forEach(el => {
+               el.checked = el.value === theme;
+           });
+           
+           if (theme === 'system') {
+               const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+               document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+           } else {
+               document.documentElement.setAttribute('data-theme', theme);
+           }
+       }
+
+       function setFontSize(size, save = true) {
+           currentFontSize = size;
+           if (save) localStorage.setItem(STORAGE_FONTSIZE_KEY, size);
+           
+           document.querySelectorAll('input[name="fontsize"]').forEach(el => {
+               el.checked = el.value === size;
+           });
+           
+           const sizeClass = size === 'small' ? 'font-small' : size === 'large' ? 'font-large' : 'font-medium';
+           document.querySelectorAll('.message-content').forEach(el => {
+               el.classList.remove('font-small', 'font-medium', 'font-large');
+               el.classList.add(sizeClass);
+           });
+       }
+
+       function setLanguage(lang, save = true) {
+           currentLang = lang;
+           if (save) localStorage.setItem(STORAGE_LANG_KEY, lang);
+           
+           document.querySelectorAll('input[name="language"]').forEach(el => {
+               el.checked = el.value === lang;
+           });
+           
+           const t = translations[lang];
+           
+           elements.introTagline.textContent = t.tagline;
+           document.getElementById('loginSubtitle').textContent = t.loginSubtitle;
+           document.getElementById('usernameLabel').textContent = t.usernameLabel;
+           document.getElementById('passwordLabel').textContent = t.passwordLabel;
+           document.getElementById('loginBtnText').textContent = t.loginBtn;
+           elements.usernameInput.placeholder = t.usernameLabel;
+           elements.passwordInput.placeholder = t.passwordLabel;
+           elements.chatInput.placeholder = t.inputPlaceholder;
+           document.getElementById('newChatText').textContent = t.newChat;
+           document.getElementById('landingTitle').textContent = t.landingTitle;
+           document.getElementById('historyTitle').textContent = t.historyTitle;
+           document.getElementById('exportMdText').textContent = t.exportMd;
+           document.getElementById('exportPdfText').textContent = t.exportPdf;
+           document.getElementById('logoutText').textContent = t.logout;
+           document.getElementById('settingsTitle').textContent = t.settings;
+           document.getElementById('displayTitle').textContent = t.display;
+           document.getElementById('themeLabel').textContent = t.theme;
+           document.getElementById('themeDark').textContent = t.themeDark;
+           document.getElementById('themeLight').textContent = t.themeLight;
+           document.getElementById('themeSystem').textContent = t.themeSystem;
+           document.getElementById('fontSizeLabel').textContent = t.fontSize;
+           document.getElementById('fontSmall').textContent = t.fontSmall;
+           document.getElementById('fontMedium').textContent = t.fontMedium;
+           document.getElementById('fontLarge').textContent = t.fontLarge;
+           document.getElementById('languageLabel').textContent = t.language;
+           document.getElementById('accountTitle').textContent = t.account;
+           document.getElementById('usernameInfoLabel').textContent = t.username;
+           document.getElementById('memberSinceLabel').textContent = t.memberSince;
+           elements.historySearch.placeholder = t.searchPlaceholder;
+           
+           renderHistory();
+       }
+
        async function checkAuth() {
            const token = localStorage.getItem(STORAGE_TOKEN_KEY);
            const username = localStorage.getItem(STORAGE_USERNAME_KEY);
@@ -1381,6 +2006,8 @@
                if (data.valid) {
                    currentToken = token;
                    currentUsername = username;
+                   initSettings();
+                   loadPinnedChats();
                    showApp();
                } else {
                    throw new Error('Token invalid');
@@ -1418,8 +2045,15 @@
 
                localStorage.setItem(STORAGE_TOKEN_KEY, currentToken);
                localStorage.setItem(STORAGE_USERNAME_KEY, currentUsername);
+               
+               const firstLogin = localStorage.getItem(STORAGE_FIRST_LOGIN_KEY);
+               if (!firstLogin) {
+                   localStorage.setItem(STORAGE_FIRST_LOGIN_KEY, new Date().toISOString());
+               }
 
                showError('');
+               initSettings();
+               loadPinnedChats();
                showApp();
 
            } catch (err) {
@@ -1433,7 +2067,7 @@
            elements.loginBtn.disabled = loading;
            elements.loginBtnText.innerHTML = loading 
                ? '<div class="loading-spinner"></div>' 
-               : 'Masuk';
+               : translations[currentLang].loginBtn;
        }
 
        function showError(message) {
@@ -1455,6 +2089,13 @@
            
            elements.userAvatar.textContent = currentUsername.charAt(0).toUpperCase();
            elements.dropdownUsername.textContent = currentUsername;
+           document.getElementById('settingsUsername').textContent = currentUsername;
+           
+           const firstLogin = localStorage.getItem(STORAGE_FIRST_LOGIN_KEY);
+           if (firstLogin) {
+               const date = new Date(firstLogin);
+               document.getElementById('settingsMemberSince').textContent = date.toLocaleDateString(currentLang === 'id' ? 'id-ID' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' });
+           }
            
            loadChatHistory();
            renderHistory();
@@ -1471,6 +2112,7 @@
            currentToken = null;
            currentUsername = null;
            chatHistory = [];
+           pinnedChats = [];
            currentChatId = null;
            
            elements.messages.innerHTML = '';
@@ -1481,9 +2123,37 @@
            showLogin();
        }
 
-       // Chat History
        function getHistoryKey() {
            return `${STORAGE_HISTORY_KEY}_${currentUsername}`;
+       }
+
+       function getPinnedKey() {
+           return `${STORAGE_PINNED_KEY}_${currentUsername}`;
+       }
+
+       function loadPinnedChats() {
+           try {
+               const saved = localStorage.getItem(getPinnedKey());
+               pinnedChats = saved ? JSON.parse(saved) : [];
+           } catch {
+               pinnedChats = [];
+           }
+       }
+
+       function savePinnedChats() {
+           localStorage.setItem(getPinnedKey(), JSON.stringify(pinnedChats));
+       }
+
+       function togglePinChat(e, id) {
+           e.stopPropagation();
+           const index = pinnedChats.indexOf(id);
+           if (index > -1) {
+               pinnedChats.splice(index, 1);
+           } else {
+               pinnedChats.push(id);
+           }
+           savePinnedChats();
+           renderHistory();
        }
 
        function loadChatHistory() {
@@ -1503,7 +2173,6 @@
            return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
        }
 
-       // Copy code function
        function copyCode(blockId) {
            const el = document.getElementById(blockId);
            if (!el) return;
@@ -1525,7 +2194,6 @@
            });
        }
 
-       // Chat Functions
        function createUserBubble(text) {
            const row = document.createElement('div');
            row.className = 'message-row user';
@@ -1591,7 +2259,6 @@
            const thinkContentId = `thinkContent_${uniqueId}`;
            const responseContentId = `responseContent_${uniqueId}`;
            
-           // Thinking Box (visible during thinking)
            const thinkingBox = document.createElement('div');
            thinkingBox.className = 'thinking-box';
            thinkingBox.id = thinkBoxId;
@@ -1613,12 +2280,11 @@
                <div class="thinking-content expanded" id="${thinkContentId}"></div>
            `;
            
-           // Response Section (hidden during thinking)
            const responseSection = document.createElement('div');
            responseSection.className = 'response-section hidden';
            responseSection.id = `responseSection_${uniqueId}`;
            responseSection.innerHTML = `
-               <div class="message-content" id="${responseContentId}">
+               <div class="message-content ${currentFontSize === 'small' ? 'font-small' : currentFontSize === 'large' ? 'font-large' : 'font-medium'}" id="${responseContentId}">
                    <span class="typing-indicator">
                        <span class="typing-dot"></span>
                        <span class="typing-dot"></span>
@@ -1745,6 +2411,48 @@
            elements.userDropdown.classList.remove('show');
        }
 
+       function startLoadingStatus() {
+           let index = 0;
+           elements.loadingStatus.textContent = loadingStatuses[0];
+           elements.loading.classList.add('active');
+           
+           loadingStatusInterval = setInterval(() => {
+               index = (index + 1) % loadingStatuses.length;
+               elements.loadingStatus.textContent = loadingStatuses[index];
+           }, 4000);
+       }
+
+       function stopLoadingStatus() {
+           if (loadingStatusInterval) {
+               clearInterval(loadingStatusInterval);
+               loadingStatusInterval = null;
+           }
+           elements.loading.classList.remove('active');
+       }
+
+       function stopGeneration() {
+           if (abortController) {
+               abortController.abort();
+           }
+       }
+
+       function showStoppedIndicator(row) {
+           const aiContent = row.querySelector('.ai-content');
+           if (!aiContent) return;
+           
+           const indicator = document.createElement('div');
+           indicator.className = 'stopped-indicator';
+           indicator.innerHTML = `
+               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                   <circle cx="12" cy="12" r="10"></circle>
+                   <line x1="12" y1="8" x2="12" y2="12"></line>
+                   <line x1="12" y1="16" x2="12.01" y2="16"></line>
+               </svg>
+               ${translations[currentLang].stoppedByUser}
+           `;
+           aiContent.appendChild(indicator);
+       }
+
        async function sendMessage() {
            const text = elements.chatInput.value.trim();
            if (!text || isProcessing) return;
@@ -1778,8 +2486,10 @@
            scrollToBottom();
 
            isProcessing = true;
-           elements.btnSend.disabled = true;
-           elements.loading.classList.add('active');
+           isStreaming = false;
+           elements.btnSend.classList.add('hidden');
+           elements.btnStop.classList.remove('hidden');
+           startLoadingStatus();
 
            abortController = new AbortController();
            let lineBuffer = "";
@@ -1787,6 +2497,7 @@
            let responseText = "";
            let isThinking = true;
            let streamDone = false;
+           let firstTokenReceived = false;
 
            try {
                const response = await fetch(API_CHAT_URL, {
@@ -1819,6 +2530,12 @@
                    const { done, value } = await reader.read();
                    if (done || streamDone) break;
 
+                   if (!firstTokenReceived && value) {
+                       firstTokenReceived = true;
+                       stopLoadingStatus();
+                       isStreaming = true;
+                   }
+
                    lineBuffer += decoder.decode(value, { stream: true });
 
                    while (lineBuffer.includes("\n")) {
@@ -1828,7 +2545,6 @@
                        
                        if (!line) continue;
                        
-                       // Try to parse as JSON marker
                        let isMarker = false;
                        const trimmedLine = line.trim();
                        
@@ -1854,20 +2570,17 @@
                                else if (data.type === "end") {
                                    isMarker = true;
                                    streamDone = true;
-                                   break; // Exit inner loop
+                                   break;
                                } 
                                else if (data.type === "error") {
                                    isMarker = true;
                                    throw new Error(data.message);
                                }
-                               // If JSON but unknown type, treat as text
                            } catch (e) {
                                if (!(e instanceof SyntaxError)) throw e;
-                               // Not valid JSON, will be treated as text below
                            }
                        }
                        
-                       // Not a marker and not in thinking phase = response text
                        if (!isMarker && !isThinking) {
                            responseText += line + '\n';
                            updateResponseSection(responseContentId, responseText);
@@ -1875,7 +2588,6 @@
                    }
                }
                
-               // Process any remaining data in buffer
                if (lineBuffer.trim() && !streamDone) {
                    const line = lineBuffer.trim();
                    let isMarker = false;
@@ -1898,31 +2610,30 @@
                    }
                }
 
-               // Clean up any accidental JSON markers in response
                responseText = responseText.replace(/\{\s*"type"\s*:\s*"end"[\s\S]*?\}\s*$/g, '');
                responseText = responseText.replace(/\{\s*"type"\s*:\s*"think_end"[\s\S]*?\}\s*$/g, '');
                responseText = responseText.trim();
 
                finalizeResponse(responseContentId, responseText);
                
-               // Save to history with proper format
                const fullResponse = thinkText ? `<think>${thinkText}</think>\n\n${responseText}` : responseText;
                saveToHistory(text, fullResponse);
                renderHistory();
 
            } catch (err) {
                if (err.name === 'AbortError') {
-                   // User cancelled
+                   stopLoadingStatus();
+                   showStoppedIndicator(aiRow);
+                   
                    if (responseText.trim() || thinkText.trim()) {
                        responseText = responseText.replace(/\{\s*"type"\s*:\s*"end"[\s\S]*?\}\s*$/g, '').trim();
                        const fullResponse = thinkText ? `<think>${thinkText}</think>\n\n${responseText}` : responseText;
                        finalizeResponse(responseContentId, responseText);
                        saveToHistory(text, fullResponse);
                        renderHistory();
-                   } else {
-                       aiRow.remove();
                    }
                } else {
+                   stopLoadingStatus();
                    aiRow.remove();
                    const errorText = err.message || 'Terjadi kesalahan koneksi.';
                    
@@ -1939,8 +2650,9 @@
                }
            } finally {
                isProcessing = false;
-               elements.btnSend.disabled = false;
-               elements.loading.classList.remove('active');
+               isStreaming = false;
+               elements.btnSend.classList.remove('hidden');
+               elements.btnStop.classList.add('hidden');
                abortController = null;
                scrollToBottom();
            }
@@ -1967,6 +2679,68 @@
            saveChatHistory();
        }
 
+       function searchHistory(query) {
+           searchQuery = query.toLowerCase();
+           elements.historySearchClear.classList.toggle('show', !!query);
+           renderHistory();
+       }
+
+       function clearHistorySearch() {
+           elements.historySearch.value = '';
+           searchQuery = '';
+           elements.historySearchClear.classList.remove('show');
+           renderHistory();
+       }
+
+       function renderHistory() {
+           let filteredHistory = chatHistory;
+           
+           if (searchQuery) {
+               filteredHistory = chatHistory.filter(chat => 
+                   chat.title.toLowerCase().includes(searchQuery)
+               );
+           }
+           
+           const pinnedHistory = filteredHistory.filter(chat => pinnedChats.includes(chat.id));
+           const unpinnedHistory = filteredHistory.filter(chat => !pinnedChats.includes(chat.id));
+           
+           const sortedHistory = [...pinnedHistory, ...unpinnedHistory];
+           
+           if (sortedHistory.length === 0) {
+               if (searchQuery) {
+                   elements.historyList.innerHTML = `<div class="no-results">${translations[currentLang].noResults} "${escapeHtml(searchQuery)}"</div>`;
+               } else {
+                   elements.historyList.innerHTML = `<div class="empty-history">${translations[currentLang].emptyHistory}</div>`;
+               }
+               return;
+           }
+           
+           elements.historyList.innerHTML = sortedHistory.map(chat => {
+               const isPinned = pinnedChats.includes(chat.id);
+               return `
+               <div class="history-item ${chat.id === currentChatId ? 'active' : ''} ${isPinned ? 'pinned' : ''}" onclick="loadChat('${chat.id}')">
+                   <div class="history-text">
+                       <div class="history-preview">${escapeHtml(chat.title)}</div>
+                       <div class="history-time">${new Date(chat.timestamp).toLocaleDateString(currentLang === 'id' ? 'id-ID' : 'en-US', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</div>
+                   </div>
+                   <div class="history-actions-item">
+                       <button class="history-pin ${isPinned ? 'pinned' : ''}" onclick="togglePinChat(event, '${chat.id}')" title="${isPinned ? 'Unpin' : 'Pin'}">
+                           <svg width="16" height="16" viewBox="0 0 24 24" fill="${isPinned ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
+                               <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                               <circle cx="12" cy="10" r="3"></circle>
+                           </svg>
+                       </button>
+                       <button class="history-delete" onclick="deleteChat(event, '${chat.id}')">
+                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                               <polyline points="3 6 5 6 21 6"></polyline>
+                               <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                           </svg>
+                       </button>
+                   </div>
+               </div>
+           `}).join('');
+       }
+
        function loadChat(id) {
            const chat = chatHistory.find(c => c.id === id);
            if (!chat) return;
@@ -1980,7 +2754,6 @@
                const userBubble = createUserBubble(m.user);
                elements.messages.appendChild(userBubble);
                
-               // Parse thinking and response
                const thinkMatch = m.ai.match(/<think>([\s\S]*?)<\/think>/);
                const thinkContent = thinkMatch ? thinkMatch[1] : '';
                const responseContent = m.ai.replace(/<think>[\s\S]*?<\/think>/, '').trim();
@@ -2005,21 +2778,24 @@
                    `;
                }
                
-               html += `<div class="message-content">${marked.parse(responseContent, { breaks: true })}</div>`;
+               const sizeClass = currentFontSize === 'small' ? 'font-small' : currentFontSize === 'large' ? 'font-large' : 'font-medium';
+               html += `<div class="message-content ${sizeClass}">${marked.parse(responseContent, { breaks: true })}</div>`;
                html += '</div>';
                
                aiRow.innerHTML = html;
                elements.messages.appendChild(aiRow);
            });
 
-           toggleHistory();
+           closePanels();
            scrollToBottom();
        }
 
        function deleteChat(e, id) {
            e.stopPropagation();
            chatHistory = chatHistory.filter(c => c.id !== id);
+           pinnedChats = pinnedChats.filter(pid => pid !== id);
            saveChatHistory();
+           savePinnedChats();
            
            if (currentChatId === id) {
                newChat();
@@ -2028,10 +2804,13 @@
        }
 
        function clearAllHistory() {
-           if (!confirm('Yakin ingin menghapus semua riwayat chat?')) return;
+           const t = translations[currentLang];
+           if (!confirm(currentLang === 'id' ? 'Yakin ingin menghapus semua riwayat chat?' : 'Are you sure you want to clear all chat history?')) return;
            
            chatHistory = [];
+           pinnedChats = [];
            saveChatHistory();
+           savePinnedChats();
            
            if (currentChatId) {
                newChat();
@@ -2039,35 +2818,84 @@
            renderHistory();
        }
 
-       function renderHistory() {
-           if (chatHistory.length === 0) {
-               elements.historyList.innerHTML = '<div class="empty-history">Belum ada riwayat chat</div>';
+       function exportChat(format) {
+           const t = translations[currentLang];
+           if (chatHistory.length === 0 && !currentChatId) {
+               showNotif(currentLang === 'id' ? 'Tidak ada chat untuk diexport' : 'No chat to export', '#ef4146');
                return;
            }
            
-           elements.historyList.innerHTML = chatHistory.map(chat => `
-               <div class="history-item ${chat.id === currentChatId ? 'active' : ''}" onclick="loadChat('${chat.id}')">
-                   <div class="history-text">
-                       <div class="history-preview">${escapeHtml(chat.title)}</div>
-                       <div class="history-time">${new Date(chat.timestamp).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</div>
-                   </div>
-                   <button class="history-delete" onclick="deleteChat(event, '${chat.id}')">
-                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                           <polyline points="3 6 5 6 21 6"></polyline>
-                           <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                       </svg>
-                   </button>
-               </div>
-           `).join('');
+           let chatsToExport = currentChatId 
+               ? chatHistory.filter(c => c.id === currentChatId)
+               : chatHistory;
+           
+           if (format === 'markdown') {
+               let mdContent = `# SouGPT Chat Export\n\n`;
+               mdContent += `Date: ${new Date().toLocaleString()}\n\n`;
+               mdContent += `---\n\n`;
+               
+               chatsToExport.forEach(chat => {
+                   mdContent += `## ${chat.title}\n\n`;
+                   chat.messages.forEach(m => {
+                       mdContent += `### Kamu\n${m.user}\n\n`;
+                       const cleanAi = m.ai.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+                       mdContent += `### SouGPT\n${cleanAi}\n\n`;
+                   });
+                   mdContent += `---\n\n`;
+               });
+               
+               const blob = new Blob([mdContent], { type: 'text/markdown' });
+               const url = URL.createObjectURL(blob);
+               const a = document.createElement('a');
+               a.href = url;
+               a.download = `SouGPT-${new Date().toISOString().split('T')[0]}.md`;
+               a.click();
+               URL.revokeObjectURL(url);
+               
+               showNotif(currentLang === 'id' ? 'Chat diexport sebagai Markdown' : 'Chat exported as Markdown', '#10a37f');
+           } else if (format === 'pdf') {
+               window.print();
+           }
+           
+           elements.userDropdown.classList.remove('show');
        }
 
        function toggleHistory() {
            elements.historyPanel.classList.toggle('open');
+           elements.settingsPanel.classList.remove('open');
            elements.overlay.classList.toggle('active');
            elements.userDropdown.classList.remove('show');
        }
 
-       // Close dropdown when clicking outside
+       function toggleSettings() {
+           elements.settingsPanel.classList.toggle('open');
+           elements.historyPanel.classList.remove('open');
+           elements.overlay.classList.toggle('active');
+           elements.userDropdown.classList.remove('show');
+       }
+
+       function closePanels() {
+           elements.historyPanel.classList.remove('open');
+           elements.settingsPanel.classList.remove('open');
+           elements.overlay.classList.remove('active');
+       }
+
+       function showNotif(message, color, duration = 3000) {
+           const notif = elements.customNotif;
+           notif.textContent = message;
+           notif.style.background = color;
+           notif.classList.add('show');
+           setTimeout(() => notif.classList.remove('show'), duration);
+       }
+
+       window.addEventListener('offline', () => {
+           showNotif(translations[currentLang].offline, '#ef4146', 5000);
+       });
+
+       window.addEventListener('online', () => {
+           showNotif(translations[currentLang].online, '#10a37f', 3000);
+       });
+
        document.addEventListener('click', (e) => {
            if (!e.target.closest('.user-menu')) {
                elements.userDropdown.classList.remove('show');
@@ -2077,6 +2905,12 @@
                document.querySelectorAll('.user-bubble.show-popup').forEach(el => {
                    el.classList.remove('show-popup');
                });
+           }
+       });
+
+       window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+           if (currentTheme === 'system') {
+               document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
            }
        });
    </script>
